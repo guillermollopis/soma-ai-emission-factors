@@ -5,7 +5,7 @@ Also cross-checks every H100-central carbon row, every water row, and both lifec
 the SOMA product's aiEmissionFactors.ts: path from the SOMA_PRODUCT_FACTORS environment variable, or
 the default relative product location if that variable is unset; the parity check is skipped (not a
 failure) if no product file is found at the resolved path.
-Run: python tools/check_factors.py"""
+Run: python tools/check_factors.py (from the repo root)"""
 import csv, os, re, sys, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
