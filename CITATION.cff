@@ -6,8 +6,9 @@ abstract: "SOMA AI Emission Factors (SAEF) is an open, versioned dataset of esti
 version: 3.0.0
 date-released: 2026-10-15
 authors:
-  - family-names: Llopis
+  - family-names: Llopis-Garcia
     given-names: Guillermo
+    orcid: "https://orcid.org/0009-0001-9985-6516"
     affiliation: SOMA AI
 license: CC-BY-4.0
 repository-code: "https://github.com/guillermollopis/soma-ai-emission-factors"
@@ -36,8 +37,9 @@ preferred-citation:
   status: preprint
   title: "Accounting for Purchased Artificial Intelligence Inference in Corporate Greenhouse Gas Inventories: A Token-Based Method"
   authors:
-    - family-names: Llopis
+    - family-names: Llopis-Garcia
       given-names: Guillermo
+      orcid: "https://orcid.org/0009-0001-9985-6516"
       affiliation: SOMA AI
   year: 2026
   identifiers:

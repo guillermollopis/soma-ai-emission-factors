@@ -95,7 +95,7 @@ Prints `OK` and exits 0 if everything reconciles; otherwise lists each mismatch 
 
 ```bibtex
 @misc{llopis2026somafactors,
-  author       = {Llopis, Guillem},
+  author       = {Llopis-Garcia, Guillermo},
   title        = {{SOMA AI Emission Factors (SAEF)}},
   year         = {2026},
   publisher    = {Zenodo},
@@ -105,7 +105,7 @@ Prints `OK` and exits 0 if everything reconciles; otherwise lists each mismatch 
 }
 
 @misc{llopis2026accounting,
-  author        = {Llopis, Guillem},
+  author        = {Llopis-Garcia, Guillermo},
   title         = {Accounting for Purchased Artificial Intelligence Inference in Corporate Greenhouse Gas Inventories: A Token-Based Method},
   year          = {2026},
   eprint        = {2606.10660},
@@ -129,4 +129,4 @@ Full derivations, all columns, boundary conditions, and the changelog are docume
 
 ## License
 
-CC BY 4.0 — see [LICENSE](LICENSE). Attribution: Llopis, G. (2026), SOMA AI Emission Factors (SAEF), https://doi.org/10.5281/zenodo.20443585.
+CC BY 4.0 — see [LICENSE](LICENSE). Attribution: Llopis-Garcia, G. (2026), SOMA AI Emission Factors (SAEF), https://doi.org/10.5281/zenodo.20443585.
