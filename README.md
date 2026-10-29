@@ -1,12 +1,16 @@
-# soma-ai-emission-factors
+# SOMA AI Emission Factors (SAEF)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20443585.svg)](https://doi.org/10.5281/zenodo.20443585)
 [![arXiv](https://img.shields.io/badge/arXiv-2606.10660-b31b1b.svg)](https://arxiv.org/abs/2606.10660)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-Open dataset of carbon and water emission factors for AI inference (LLM API calls), built for corporate GHG inventories under CSRD / GHG Protocol Scope 3 Category 1. Every factor is derived from primary, cited sources — GPU energy benchmarks, grid carbon intensity registries, datacenter water-use studies — with the full derivation documented in the associated paper's Supplementary S1 and reproducible from `tools/check_factors.py`. Published by [SOMA AI](https://app.somaai.earth), Barcelona, under CC BY 4.0.
+SOMA AI Emission Factors (SAEF) is an open, versioned dataset of estimated carbon and water factors for AI inference, per million tokens, by model class and by region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions. Every factor traces to a file and a source, and the Python calculator returns the file and column behind each number. Published by [SOMA AI](https://somaai.earth), Barcelona, under CC BY 4.0. The method paper, arXiv 2606.10660, is a preprint under peer review.
+
+This repository holds the v2.0.0 snapshot of the CSV files (17 cloud regions). The current release is Zenodo v3.0.0 (2026-10-15, version DOI [10.5281/zenodo.23371447](https://doi.org/10.5281/zenodo.23371447)), which covers 210 countries and economies, 27 US eGRID subregions and 143 cloud regions.
 
 ## Files
+
+The files below are the v2.0.0 snapshot kept in this repository. The full v3.0.0 file set is on [Zenodo](https://doi.org/10.5281/zenodo.20443585).
 
 | File | Rows | What it contains |
 |---|---|---|
@@ -68,7 +72,7 @@ Generated from `carbon_factors.csv`, filtered to `model_class == class_b_mid` an
 | Singapore | `ap-southeast-1` | 0.471 | 0.07615 |
 | Japan | `ap-northeast-1` | 0.492 | 0.07954 |
 
-Same model class, same infrastructure — a ~12.3x spread from region alone (Sweden to Singapore). Region is usually the dominant lever in an inference-heavy inventory, not model choice. See `lifecycle_factors.csv` for the region-independent embodied-hardware and training add-ons to add on top of this electricity term (the "three-term factor" in the dataset README).
+Same model class, same infrastructure, a ~12.3x spread from region alone in the v2.0.0 snapshot (Sweden to Singapore). Region is usually the dominant lever in an inference-heavy inventory, not model choice. See `lifecycle_factors.csv` for the region-independent embodied-hardware and training add-ons to add on top of this electricity term (the "three-term factor" in the dataset README).
 
 ## How the checker works
 
@@ -92,17 +96,17 @@ Prints `OK` and exits 0 if everything reconciles; otherwise lists each mismatch 
 ```bibtex
 @misc{llopis2026somafactors,
   author       = {Llopis, Guillem},
-  title        = {SOMA AI-Inference Emission and Resource Factors},
+  title        = {{SOMA AI Emission Factors (SAEF)}},
   year         = {2026},
   publisher    = {Zenodo},
-  version      = {v2.0.0},
+  version      = {v3.0.0},
   doi          = {10.5281/zenodo.20443585},
   url          = {https://doi.org/10.5281/zenodo.20443585}
 }
 
 @misc{llopis2026accounting,
   author        = {Llopis, Guillem},
-  title         = {Accounting for AI Inference in Corporate GHG Inventories: A Four-Tier Methodology for Scope 3 Category 1 Reporting},
+  title         = {Accounting for Purchased Artificial Intelligence Inference in Corporate Greenhouse Gas Inventories: A Token-Based Method},
   year          = {2026},
   eprint        = {2606.10660},
   archivePrefix = {arXiv},
@@ -115,7 +119,9 @@ Full derivations, all columns, boundary conditions, and the changelog are docume
 ## Links
 
 - Zenodo (concept DOI, always latest version): https://doi.org/10.5281/zenodo.20443585
-- Paper (arXiv, under peer review): https://arxiv.org/abs/2606.10660
+- Zenodo v3.0.0 record: https://zenodo.org/records/23371447
+- Website: https://somaai.earth/ai-footprint/factors
+- Paper (arXiv, preprint under peer review): https://arxiv.org/abs/2606.10660
 - Methodology: https://app.somaai.earth/methodology
 - Developer docs / API: https://app.somaai.earth/docs/ai-factors
 - Factor pages: https://app.somaai.earth/ai-factors
@@ -123,4 +129,4 @@ Full derivations, all columns, boundary conditions, and the changelog are docume
 
 ## License
 
-CC BY 4.0 — see [LICENSE](LICENSE). Attribution: Llopis, G. (2026), SOMA AI-Inference Emission and Resource Factors, https://doi.org/10.5281/zenodo.20443585.
+CC BY 4.0 — see [LICENSE](LICENSE). Attribution: Llopis, G. (2026), SOMA AI Emission Factors (SAEF), https://doi.org/10.5281/zenodo.20443585.

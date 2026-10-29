@@ -1,24 +1,25 @@
 cff-version: 1.2.0
 message: "If you use this dataset, please cite both the dataset (below) and the preferred-citation paper."
 type: dataset
-title: "SOMA AI-Inference Emission and Resource Factors"
-version: 2.0.0
-date-released: 2026-09-15
+title: "SOMA AI Emission Factors (SAEF)"
+abstract: "SOMA AI Emission Factors (SAEF) is an open, versioned dataset of estimated carbon and water factors for AI inference, per million tokens, by model class and by region, for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions."
+version: 3.0.0
+date-released: 2026-10-15
 authors:
   - family-names: Llopis
     given-names: Guillermo
     affiliation: SOMA AI
 license: CC-BY-4.0
 repository-code: "https://github.com/guillermollopis/soma-ai-emission-factors"
-url: "https://app.somaai.earth/methodology"
-doi: 10.5281/zenodo.22767475
+url: "https://somaai.earth/ai-footprint/factors"
+doi: 10.5281/zenodo.23371447
 identifiers:
   - type: doi
     value: 10.5281/zenodo.20443585
     description: "Concept DOI — represents all versions of the dataset and always resolves to the latest one"
   - type: doi
-    value: 10.5281/zenodo.22767475
-    description: "Version DOI for v2.0.0 (2026-09-15)"
+    value: 10.5281/zenodo.23371447
+    description: "Version DOI for v3.0.0 (2026-10-15)"
 keywords:
   - carbon-footprint
   - ai-emissions
@@ -29,9 +30,11 @@ keywords:
   - emission-factors
   - water-footprint
   - llm
+  - inference
 preferred-citation:
   type: article
-  title: "Accounting for AI Inference in Corporate GHG Inventories: A Four-Tier Methodology for Scope 3 Category 1 Reporting"
+  status: preprint
+  title: "Accounting for Purchased Artificial Intelligence Inference in Corporate Greenhouse Gas Inventories: A Token-Based Method"
   authors:
     - family-names: Llopis
       given-names: Guillermo
