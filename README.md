@@ -122,9 +122,14 @@ Full derivations, all columns, boundary conditions, and the changelog are docume
 - Zenodo v3.0.0 record: https://zenodo.org/records/23371447
 - Website: https://somaai.earth/ai-footprint/factors
 - Paper (arXiv, preprint under peer review): https://arxiv.org/abs/2606.10660
-- Methodology: https://app.somaai.earth/methodology
-- Developer docs / API: https://app.somaai.earth/docs/ai-factors
-- Factor pages: https://app.somaai.earth/ai-factors
+- Methodology: https://somaai.earth/ai-footprint/methodology
+- Developer docs / API: https://somaai.earth/ai-footprint/data
+- Free AI carbon footprint calculator for organisations: https://somaai.earth/ai-footprint/calculator
+- How to calculate a company's AI carbon footprint (Scope 3 method): https://somaai.earth/ai-footprint/guides/ai-usage-csrd-scope-3
+- Why published AI footprint figures differ: https://somaai.earth/ai-footprint/guides/why-ai-footprint-estimates-differ
+- AI carbon footprint tools compared: https://somaai.earth/ai-footprint/guides/ai-carbon-footprint-tools-compared
+- AI environmental impact statistics, with sources: https://somaai.earth/ai-footprint/answers/ai-environmental-impact-statistics
+- Guía en español: https://somaai.earth/ai-footprint/guias/huella-de-carbono-ia-empresa
 - Contact: guillermollopis@somaai.earth
 
 ## License
