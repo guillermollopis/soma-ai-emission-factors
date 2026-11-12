@@ -6,6 +6,7 @@ from ._core import (
     citation,
     estimate,
     factor,
+    grids,
     model_class_for,
     regions,
 )
@@ -20,6 +21,7 @@ __all__ = [
     "citation",
     "estimate",
     "factor",
+    "grids",
     "model_class_for",
     "regions",
 ]

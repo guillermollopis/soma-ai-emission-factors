@@ -6,13 +6,15 @@ import shutil
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEST = ROOT / "src" / "saef" / "data"
 FILES = [
-    "carbon_factors.csv",
-    "water_factors.csv",
-    "energy_factors.csv",
-    "grid_intensity.csv",
-    "lifecycle_factors.csv",
+    "token_basis_constants.csv",
+    "model_factors.csv",
     "model_class_mapping.csv",
-    "energy_per_token_raw.csv",
+    "region_grid_crosswalk.csv",
+    "grid_intensity_all.csv",
+    "cloud_region_factors.csv",
+    "factors_v3_lifecycle.csv",
+    "reserved_capacity_factors.csv",
+    "region_water_factors.csv",
 ]
 
 DEST.mkdir(parents=True, exist_ok=True)

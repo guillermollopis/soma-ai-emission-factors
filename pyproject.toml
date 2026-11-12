@@ -48,7 +48,7 @@ pattern = 'DATASET_VERSION = "(?P<version>[^"]+)"'
 packages = ["src/saef"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src/saef", "tests", "scripts", "tools", "PYPI_README.md", "LICENSE", "LICENSE-CODE", "pyproject.toml", "*.csv"]
+include = ["src/saef", "tests", "scripts", "PYPI_README.md", "LICENSE", "LICENSE-CODE", "pyproject.toml", "*.csv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

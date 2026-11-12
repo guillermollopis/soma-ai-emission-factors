@@ -1,26 +1,17 @@
-import csv
-import fnmatch
-import io
 from dataclasses import dataclass, field
-from functools import lru_cache
-from importlib import resources
 from typing import Optional
 
-DATASET_VERSION = "2.0.0"
-DEFAULT_SCENARIO = "H100-central"
-LIFECYCLE_TERMS = ("embodied_hardware", "training_amortised")
+from . import _calc
+from ._calc import SaefError
 
-CLASS_ALIASES = {
-    "A": "class_a_small",
-    "B": "class_b_mid",
-    "C": "class_c_large_moe",
-}
+DATASET_VERSION = "3.0.0"
 
 BIBTEX = """@misc{llopis2026somafactors,
   author       = {Llopis-Garcia, Guillermo},
   title        = {{SOMA AI Emission Factors (SAEF)}},
   year         = {2026},
   publisher    = {Zenodo},
+  version      = {v3.0.0},
   doi          = {10.5281/zenodo.20443585},
   url          = {https://doi.org/10.5281/zenodo.20443585}
 }
@@ -36,213 +27,136 @@ BIBTEX = """@misc{llopis2026somafactors,
 """
 
 
-class SaefError(ValueError):
-    pass
+def regions(provider=None):
+    """Cloud region ids (AWS, Azure, Google Cloud), sorted. Pass provider='aws'|'azure'|'gcp' to filter."""
+    rows = _calc.read("cloud_region_factors.csv")
+    if provider:
+        rows = [r for r in rows if r["provider"].lower() == provider.strip().lower()]
+    return sorted({r["region_id"] for r in rows})
 
 
-@lru_cache(maxsize=None)
-def _read(name):
-    text = resources.files("saef").joinpath("data", name).read_text(encoding="utf-8")
-    return tuple(csv.DictReader(io.StringIO(text, newline="")))
-
-
-def _region_key(region_id):
-    return region_id.split(" (")[0].strip()
-
-
-def regions():
-    """Region ids available in the dataset, sorted."""
-    return sorted({_region_key(r["region_id"]) for r in _read("carbon_factors.csv")})
-
-
-def _region_labels():
-    labels = {}
-    for r in _read("carbon_factors.csv"):
-        key = _region_key(r["region_id"])
-        labels[key] = r["region_id"][len(key):].strip(" ()")
-    return labels
-
-
-def _resolve_region(region):
-    available = regions()
-    wanted = region.strip().lower()
-    for rid in available:
-        if rid.lower() == wanted:
-            return rid
-    by_label = [rid for rid, label in _region_labels().items() if label and wanted in label.lower()]
-    if len(by_label) == 1:
-        return by_label[0]
-    prefixed = [rid for rid in available if rid.lower().startswith(wanted)]
-    if len(prefixed) == 1:
-        return prefixed[0]
-    candidates = sorted(set(by_label) | set(prefixed))
-    if candidates:
-        raise SaefError(f"Region {region!r} is ambiguous, candidates: {', '.join(candidates)}")
-    raise SaefError(f"Unknown region {region!r}. Available regions: {', '.join(available)}")
-
-
-def _resolve_class(model_class):
-    raw = str(model_class).strip()
-    cls = CLASS_ALIASES.get(raw.upper(), raw)
-    known = {r["model_class"] for r in _read("carbon_factors.csv")}
-    if cls not in known:
-        raise SaefError(
-            f"No carbon factors for model class {model_class!r}. Available: {', '.join(sorted(known))} (or A, B, C)"
-        )
-    return cls
-
-
-def _lookup_model(model):
-    name = model.strip().lower().rsplit("/", 1)[-1]
-    best, best_score = None, -1
-    for r in _read("model_class_mapping.csv"):
-        for pattern in r["model_pattern"].split(";"):
-            pattern = pattern.strip().lower()
-            if fnmatch.fnmatchcase(name, pattern) or fnmatch.fnmatchcase(name, pattern + "*"):
-                score = len(pattern.replace("*", ""))
-                if score > best_score:
-                    best, best_score = r, score
-    if best is None:
-        raise SaefError(f"Model {model!r} is not in model_class_mapping.csv. Pass model_class=A|B|C explicitly.")
-    return best
+def grids():
+    """Grid ids usable as a region: ISO-3 country codes, eGRID subregions, EU27, WORLD and one subnational row."""
+    return sorted(r["grid_id"] for r in _calc.read("grid_intensity_all.csv"))
 
 
 def model_class_for(model):
-    """Map a model name such as 'gpt-4o' to its SAEF model class via model_class_mapping.csv."""
-    return _lookup_model(model)["model_class"]
+    """Map a model identifier such as 'gpt-4o' to its class (A, B or C) via model_class_mapping.csv.
+
+    An identifier that matches no pattern is assigned the conservative class C, as the dataset specifies."""
+    m = _calc.map_model(model)
+    if m["out_of_scope"]:
+        raise SaefError(f"{model!r} is out of scope (embeddings, image, audio, video or moderation)")
+    return m["model_class"]
 
 
-def _find(name, cls, scenario, rid):
-    for r in _read(name):
-        if r["model_class"] == cls and r["infra_scenario"] == scenario and _region_key(r["region_id"]) == rid:
-            return r
-    return None
+def factor(model_class="B", region="us-east-1", provider=None):
+    """Class factor at one region, H100 central case.
 
-
-def factor(model_class="B", region="us-east", scenario=DEFAULT_SCENARIO):
-    """Total factor in kg CO2e per million output tokens, with its three terms, water and sources."""
-    cls = _resolve_class(model_class)
-    rid = _resolve_region(region)
-    row = _find("carbon_factors.csv", cls, scenario, rid)
-    if row is None:
-        scenarios = sorted(
-            {
-                r["infra_scenario"]
-                for r in _read("carbon_factors.csv")
-                if r["model_class"] == cls and _region_key(r["region_id"]) == rid
-            }
-        )
-        raise SaefError(
-            f"No {scenario!r} row for {cls} in {rid}. Scenarios available for this class and region: {', '.join(scenarios)}"
-        )
-    terms = {"electricity": float(row["kg_co2e_per_1m_tokens"])}
-    sources = {
-        "electricity": {
-            "file": "carbon_factors.csv",
-            "column": "kg_co2e_per_1m_tokens",
-            "row": f"{row['model_class']} | {row['infra_scenario']} | {row['region_id']}",
-        }
-    }
-    for term in LIFECYCLE_TERMS:
-        lc = next((r for r in _read("lifecycle_factors.csv") if r["model_class"] == cls and r["term"] == term), None)
-        if lc is None:
-            raise SaefError(f"lifecycle_factors.csv has no {term} row for {cls}")
-        terms[term] = float(lc["kg_co2e_per_1m_tokens"])
-        sources[term] = {
-            "file": "lifecycle_factors.csv",
-            "column": "kg_co2e_per_1m_tokens",
-            "row": f"{cls} | {term}",
-        }
-    water = None
-    wrow = _find("water_factors.csv", cls, scenario, rid)
-    if wrow is not None:
-        water = float(wrow["total_ml_per_1k_tokens"]) * 1000
-        sources["water"] = {
-            "file": "water_factors.csv",
-            "column": "total_ml_per_1k_tokens",
-            "row": f"{wrow['model_class']} | {wrow['infra_scenario']} | {wrow['region_id']}",
-        }
+    kg_co2e_per_1m_billed_tokens is the headline for a billed total with the default input share.
+    terms are kg CO2e per million EFFECTIVE tokens (electricity, embodied, construction), plus training per million billed tokens."""
+    cl = _calc.emissions(model_class=model_class, provider=provider, region=region, billed_tokens=1e6)
+    f = cl["factors"]
     return {
-        "model_class": cls,
-        "region": rid,
-        "scenario": scenario,
-        "kg_co2e_per_1m_tokens": sum(terms.values()),
-        "terms": terms,
-        "water_ml_per_1m_tokens": water,
+        "model_class": cl["model_class"],
+        "region_id": cl["region_id"],
+        "grid_id": cl["grid_id"],
+        "grid_kg_co2e_per_kwh": cl["grid_kg_co2e_per_kwh"],
+        "kg_co2e_per_1m_billed_tokens": f["per_billed"],
+        "kg_co2e_per_1m_effective_tokens": f["footprint"],
+        "kg_co2e_per_1m_effective_tokens_high_case": f["footprint_high"],
+        "terms": {
+            "electricity": f["electricity"],
+            "embodied": f["embodied"],
+            "construction": f["construction"],
+            "training_per_1m_billed_tokens": f["training"],
+        },
+        "effective_per_billed_tokens": _calc.effective_from_billed(1.0),
         "version": DATASET_VERSION,
-        "sources": sources,
+        "warnings": cl["warnings"],
+        "provenance": cl["provenance"],
     }
 
 
 @dataclass(frozen=True)
 class Estimate:
     kg_co2e: float
+    kg_co2e_high_case: float
+    development_line_kg_co2e: float
+    terms_kg_co2e: dict
     water_ml: Optional[float]
-    tokens: float
-    effective_tokens: float
-    reasoning_multiplier: float
+    water_ml_excl_hydro: Optional[float]
     model: Optional[str]
     model_class: str
-    region: str
-    scenario: str
-    terms_kg_co2e: dict
-    factor: dict = field(repr=False)
-    sources: dict = field(repr=False)
+    class_basis: str
+    region_id: str
+    grid_kg_co2e_per_kwh: float
+    billed_tokens: float
+    effective_tokens: float
+    warnings: list = field(repr=False)
+    provenance: list = field(repr=False)
+    water: dict = field(repr=False)
     version: str = DATASET_VERSION
-    note: str = "Estimate, not a measurement."
+    note: str = "Estimate, not a measurement. The high case is a conservative bound; the development line is reported separately and is not part of kg_co2e."
+
+    @property
+    def sources(self):
+        return self.provenance
 
     def to_dict(self):
         return {k: getattr(self, k) for k in self.__dataclass_fields__}
 
 
 def estimate(
-    tokens,
+    tokens=None,
     model=None,
     model_class=None,
-    region="global-average",
-    scenario=DEFAULT_SCENARIO,
-    reasoning_multiplier=None,
+    region=None,
+    provider=None,
+    output_tokens=None,
+    input_tokens=0.0,
+    cached_input_tokens=0.0,
 ):
-    """Estimate kg CO2e (and water in mL when available) for a number of output tokens.
+    """Estimate kg CO2e (and water in mL where the region has a water factor) for AI inference.
 
-    Give model or model_class. When model is given, its reasoning multiplier from
-    model_class_mapping.csv scales the tokens (hidden reasoning tokens); override it with reasoning_multiplier.
+    Pass tokens, the BILLED total (input plus output), or pass output_tokens with input_tokens and
+    cached_input_tokens for a billing-export split. Pass model or model_class. region may be a cloud
+    region id, an ISO-3 country code, an eGRID subregion, 'eu-27' or None for the global average.
+    Every number is traced in provenance by file, line and column.
     """
-    if tokens < 0:
-        raise SaefError("tokens must be >= 0")
-    if (model is None) == (model_class is None):
-        raise SaefError("Pass exactly one of model or model_class")
-    extra = {}
-    multiplier = 1.0
-    if model is not None:
-        mrow = _lookup_model(model)
-        model_class = mrow["model_class"]
-        multiplier = float(mrow["reasoning_multiplier"])
-        extra["model_class"] = {
-            "file": "model_class_mapping.csv",
-            "column": "model_class, reasoning_multiplier",
-            "row": mrow["model_pattern"],
-        }
-    if reasoning_multiplier is not None:
-        multiplier = float(reasoning_multiplier)
-    f = factor(model_class, region, scenario)
-    effective = tokens * multiplier
-    millions = effective / 1e6
-    terms = {k: v * millions for k, v in f["terms"].items()}
-    water = f["water_ml_per_1m_tokens"]
+    if (tokens is None) == (output_tokens is None):
+        raise SaefError("Pass either tokens (billed total) or output_tokens (with input_tokens)")
+    given = tokens if tokens is not None else output_tokens
+    if given < 0 or input_tokens < 0 or cached_input_tokens < 0:
+        raise SaefError("token counts must be >= 0")
+    r = _calc.emissions(
+        model=model, model_class=model_class, provider=provider, region=region,
+        billed_tokens=tokens, output_tokens=output_tokens or 0.0,
+        input_tokens=input_tokens, cached_input_tokens=cached_input_tokens,
+    )
+    w = _calc.water(r["effective_tokens"], r["model_class"], provider, region)
     return Estimate(
-        kg_co2e=sum(terms.values()),
-        water_ml=None if water is None else water * millions,
-        tokens=tokens,
-        effective_tokens=effective,
-        reasoning_multiplier=multiplier,
+        kg_co2e=r["kg_co2e"],
+        kg_co2e_high_case=r["kg_co2e_high_case"],
+        development_line_kg_co2e=r["development_line_kg_co2e"],
+        terms_kg_co2e={
+            "electricity": r["electricity_kg_co2e"],
+            "embodied": r["embodied_kg_co2e"],
+            "construction": r["construction_kg_co2e"],
+            "training": r["training_kg_co2e"],
+        },
+        water_ml=w["ml_total_reig"] if w["available"] else None,
+        water_ml_excl_hydro=w["ml_total_excl_hydro"] if w["available"] else None,
         model=model,
-        model_class=f["model_class"],
-        region=f["region"],
-        scenario=f["scenario"],
-        terms_kg_co2e=terms,
-        factor=f,
-        sources={**f["sources"], **extra},
+        model_class=r["model_class"],
+        class_basis=r["class_basis"],
+        region_id=r["region_id"],
+        grid_kg_co2e_per_kwh=r["grid_kg_co2e_per_kwh"],
+        billed_tokens=r["billed_tokens"],
+        effective_tokens=r["effective_tokens"],
+        warnings=list(dict.fromkeys(r["warnings"] + w["warnings"])),
+        provenance=r["provenance"] + w["provenance"],
+        water=w,
     )
 
 
