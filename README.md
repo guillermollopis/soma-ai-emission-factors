@@ -127,6 +127,8 @@ B 2.231e-05 3.235e-05 0.0785
 
 Every figure is an estimate. Models the dataset treats as out of scope, such as embeddings, are skipped and counted in `totals()["skipped_calls"]`.
 
+Example notebooks: [`examples/quickstart.ipynb`](examples/quickstart.ipynb), and a runnable copy on Kaggle, [Estimate the carbon footprint of your LLM API calls](https://www.kaggle.com/code/guillermollopis/estimate-the-carbon-footprint-of-your-llm-api-call).
+
 ## Files
 
 | File | Rows | What it contains |
@@ -188,6 +190,8 @@ The numbers are estimates, not measurements.
 Pin a dataset in an inventory by the version DOI. The concept DOI always resolves to the latest version.
 
 ## Links
+
+- Kaggle notebook: https://www.kaggle.com/code/guillermollopis/estimate-the-carbon-footprint-of-your-llm-api-call
 
 - Zenodo (concept DOI, always latest version): https://doi.org/10.5281/zenodo.20443585
 - Zenodo v3.1.0 record: https://zenodo.org/records/24160409
