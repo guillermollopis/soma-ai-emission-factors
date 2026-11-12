@@ -30,7 +30,7 @@ The package bundles the nine CSV files below and has no dependencies. It is buil
 
 ## Integrations
 
-The core package has no dependencies. The integrations below estimate carbon and water for each call from the token usage your framework already reports. The region comes from the `region` argument, then from the `SAEF_REGION` environment variable, then falls back to the global average. All three keep running totals and can append one JSON line per call with `log_path=`.
+The core package has no dependencies. The integrations below estimate carbon and water for each call from the token usage your framework already reports. The region comes from the `region` argument, then from the `SAEF_REGION` environment variable, then falls back to the global average. All of them keep running totals and can append one JSON line per call with `log_path=`.
 
 LiteLLM, installed with `pip install "saef[litellm]"`. The estimate is also attached to `response._hidden_params["saef"]`.
 
@@ -74,6 +74,35 @@ print(f"{t['kg_co2e']:.3e} kg CO2e, {t['kg_co2e_high_case']:.3e} high case")
 ```text
 1 400 800 300
 2.894e-05 kg CO2e, 4.433e-05 high case
+```
+
+LangChain v1 agents can use middleware instead of a callback. `SaefMiddleware` hooks `wrap_model_call` and `awrap_model_call`, records one estimate per model call, and with `attach=True` also writes the estimate to `AIMessage.response_metadata["saef"]`. It needs the `langchain` package, which the `langchain` extra installs. The example again uses a fake chat model.
+
+```python
+from langchain.agents import create_agent
+from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
+from langchain_core.messages import AIMessage
+from saef.integrations.langchain import SaefMiddleware
+
+reply = AIMessage(
+    content="Hi there",
+    response_metadata={"model_name": "gpt-4o"},
+    usage_metadata={"input_tokens": 1200, "output_tokens": 300, "total_tokens": 1500, "input_token_details": {"cache_read": 800}},
+)
+llm = GenericFakeChatModel(messages=iter([reply]))
+mw = SaefMiddleware(region="eu-west-1", attach=True)
+agent = create_agent(llm, tools=[], middleware=[mw])
+out = agent.invoke({"messages": [("user", "Hello")]})
+t = mw.totals()
+print(t["calls"], t["input_tokens"], t["cached_input_tokens"], t["output_tokens"])
+print(f"{t['kg_co2e']:.3e} kg CO2e, {t['kg_co2e_high_case']:.3e} high case")
+print(out["messages"][-1].response_metadata["saef"]["kg_co2e"])
+```
+
+```text
+1 400 800 300
+2.894e-05 kg CO2e, 4.433e-05 high case
+2.894105237117252e-05
 ```
 
 Response objects, with no extra install and no SDK import. `estimate_from_response` reads OpenAI Chat Completions, OpenAI Responses and Anthropic Messages objects, or the same shapes as dicts. Cache reads get the cache credit and cache writes count as ordinary input.

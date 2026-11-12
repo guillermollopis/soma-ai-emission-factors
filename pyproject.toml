@@ -29,7 +29,7 @@ dependencies = []
 [project.optional-dependencies]
 pandas = ["pandas"]
 litellm = ["litellm"]
-langchain = ["langchain-core"]
+langchain = ["langchain>=1.0"]
 test = ["pytest"]
 
 [project.scripts]

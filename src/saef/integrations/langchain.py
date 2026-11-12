@@ -5,8 +5,18 @@
     handler = SaefCallbackHandler(region="eu-west-1")
     llm.invoke("hello", config={"callbacks": [handler]})
     handler.totals()
+
+For LangChain v1 agents, SaefMiddleware (needs the `langchain` package) records one estimate per model call:
+
+    from langchain.agents import create_agent
+    from saef.integrations.langchain import SaefMiddleware
+
+    saef_mw = SaefMiddleware(region="eu-west-1", attach=True)
+    agent = create_agent("openai:gpt-4o", tools=[], middleware=[saef_mw])
+    saef_mw.totals()
 """
 from langchain_core.callbacks import BaseCallbackHandler
+from langchain_core.messages import AIMessage
 
 from ._base import Tracker
 
@@ -88,3 +98,88 @@ class SaefCallbackHandler(BaseCallbackHandler):
         if inp + cached + out <= 0:
             return
         self._tracker.record(model, inp, out, cached, extra={"run_id": str(run_id)})
+
+
+try:
+    from langchain.agents.middleware import AgentMiddleware, ExtendedModelResponse, ModelResponse
+except ImportError:
+    AgentMiddleware = None
+
+
+def _ai_message(result):
+    if isinstance(result, ExtendedModelResponse):
+        result = result.model_response
+    msgs = result.result if isinstance(result, ModelResponse) else [result]
+    for m in reversed(msgs):
+        if isinstance(m, AIMessage):
+            return m
+    return None
+
+
+def _model_from_message(msg, request):
+    rm = msg.response_metadata or {}
+    model = rm.get("model_name") or rm.get("model")
+    if model:
+        return model
+    m = getattr(request, "model", None)
+    for k in ("model_name", "model", "model_id"):
+        v = getattr(m, k, None)
+        if isinstance(v, str) and v:
+            return v
+    return None
+
+
+if AgentMiddleware is None:
+
+    class SaefMiddleware:
+        def __init__(self, *args, **kwargs):
+            raise ImportError('SaefMiddleware needs LangChain v1: pip install langchain')
+
+else:
+
+    class SaefMiddleware(AgentMiddleware):
+        """Estimates carbon and water for every model call an agent makes, via wrap_model_call and awrap_model_call.
+
+        region defaults to env SAEF_REGION, then 'global-average'. The model name comes from the response metadata, then
+        from the request's chat model. Calls without a model name or without usage_metadata are not counted. With
+        attach=True the estimate is also written to AIMessage.response_metadata["saef"]."""
+
+        def __init__(self, region=None, log_path=None, attach=False):
+            super().__init__()
+            self._tracker = Tracker(region=region, log_path=log_path)
+            self.attach = attach
+
+        def totals(self):
+            return self._tracker.totals()
+
+        def reset(self):
+            self._tracker.reset()
+
+        def _record(self, request, result):
+            msg = _ai_message(result)
+            if msg is None:
+                return
+            um = msg.usage_metadata
+            if not um:
+                return
+            model = _model_from_message(msg, request)
+            if not model:
+                return
+            c = _num((um.get("input_token_details") or {}).get("cache_read"))
+            inp = _num(um.get("input_tokens")) - c
+            out = _num(um.get("output_tokens"))
+            if inp + c + out <= 0:
+                return
+            rec = self._tracker.record(model, inp, out, c, extra={"message_id": msg.id})
+            if rec and self.attach:
+                msg.response_metadata["saef"] = rec
+
+        def wrap_model_call(self, request, handler):
+            result = handler(request)
+            self._record(request, result)
+            return result
+
+        async def awrap_model_call(self, request, handler):
+            result = await handler(request)
+            self._record(request, result)
+            return result

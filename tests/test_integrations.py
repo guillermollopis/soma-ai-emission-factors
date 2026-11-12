@@ -186,3 +186,66 @@ def test_langchain_skips_without_model_or_usage():
     h.on_llm_end(LLMResult(generations=[[Generation(text="x")]], llm_output={"token_usage": {"prompt_tokens": 1}}), run_id=uuid.uuid4())
     h.on_llm_end(LLMResult(generations=[[Generation(text="x")]], llm_output={"model_name": "gpt-4o"}), run_id=uuid.uuid4())
     assert h.totals()["calls"] == 0
+
+
+def _fake_agent_parts(replies):
+    from langchain.agents import create_agent
+    from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
+    from langchain_core.messages import AIMessage
+
+    msgs = [AIMessage(content="Hi there", response_metadata={"model_name": "gpt-4o"}, usage_metadata=u) for u in replies]
+    return create_agent, GenericFakeChatModel(messages=iter(msgs))
+
+
+_USAGE = {"input_tokens": 1200, "output_tokens": 300, "total_tokens": 1500, "input_token_details": {"cache_read": 800}}
+
+
+def test_langchain_middleware_agent_run_attaches_and_totals(tmp_path):
+    pytest.importorskip("langchain.agents")
+    from saef.integrations.langchain import SaefMiddleware
+
+    create_agent, llm = _fake_agent_parts([_USAGE])
+    log = tmp_path / "mw.jsonl"
+    mw = SaefMiddleware(region="eu-west-1", attach=True, log_path=str(log))
+    out = create_agent(llm, tools=[], middleware=[mw]).invoke({"messages": [("user", "Hello")]})
+    d = direct(model="gpt-4o", region="eu-west-1", input_tokens=400, cached_input_tokens=800, output_tokens=300)
+    t = mw.totals()
+    assert t["calls"] == 1 and t["kg_co2e"] == d.kg_co2e
+    assert out["messages"][-1].response_metadata["saef"]["kg_co2e"] == d.kg_co2e
+    assert len(log.read_text().splitlines()) == 1
+
+
+def test_langchain_middleware_no_attach_by_default_and_async():
+    pytest.importorskip("langchain.agents")
+    import asyncio
+
+    from saef.integrations.langchain import SaefMiddleware
+
+    create_agent, llm = _fake_agent_parts([_USAGE, _USAGE])
+    mw = SaefMiddleware(region="eu-west-1")
+    agent = create_agent(llm, tools=[], middleware=[mw])
+    out = agent.invoke({"messages": [("user", "Hello")]})
+    assert "saef" not in out["messages"][-1].response_metadata
+    asyncio.run(agent.ainvoke({"messages": [("user", "Again")]}))
+    assert mw.totals()["calls"] == 2
+    mw.reset()
+    assert mw.totals()["calls"] == 0
+
+
+def test_langchain_middleware_skips_without_usage_and_falls_back_to_request_model():
+    pytest.importorskip("langchain.agents")
+    from langchain_core.messages import AIMessage
+
+    from saef.integrations.langchain import SaefMiddleware
+
+    class M:
+        model_name = "gpt-4o"
+
+    class R:
+        model = M()
+
+    mw = SaefMiddleware(region="eu-west-1")
+    mw.wrap_model_call(R(), lambda r: AIMessage(content="x"))
+    assert mw.totals()["calls"] == 0
+    mw.wrap_model_call(R(), lambda r: AIMessage(content="x", usage_metadata={"input_tokens": 10, "output_tokens": 5, "total_tokens": 15}))
+    assert mw.totals()["calls"] == 1
