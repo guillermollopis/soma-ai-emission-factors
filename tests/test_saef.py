@@ -127,3 +127,28 @@ def test_cli_error_exit_code():
     p = run_cli("estimate", "--tokens", "10", "--model-class", "B", "--region", "mars-1")
     assert p.returncode == 2
     assert "Unknown region" in p.stdout
+
+
+def test_parity_with_official_calculator():
+    import importlib
+    import os
+
+    folder = os.environ.get("SAEF_OFFICIAL_DIR")
+    if not folder:
+        pytest.skip("set SAEF_OFFICIAL_DIR to the folder holding ai_inference_emissions.py")
+    sys.path.insert(0, folder)
+    try:
+        off = importlib.import_module("ai_inference_emissions")
+    finally:
+        sys.path.remove(folder)
+    for prov, reg in [(None, "eu-west-1"), ("azure", "swedencentral"), (None, "ap-southeast-1"), (None, "eu-south-2"), (None, "DEU"), (None, None)]:
+        for model in ("gpt-4o", "gpt-4o-mini", "o3", "llama-3.1-70b"):
+            o = off.emissions(model=model, provider=prov, region=reg, input_tokens=10e6, output_tokens=2e6)
+            e = saef.estimate(model=model, provider=prov, region=reg, input_tokens=10e6, output_tokens=2e6)
+            assert e.kg_co2e == pytest.approx(o["kg_co2e"], rel=1e-9)
+            assert e.kg_co2e_high_case == pytest.approx(o["kg_co2e_high_case"], rel=1e-9)
+            w = off.water(o["effective_tokens"], o["model_class"], prov, reg)
+            if w["litres_total_reig"] is None:
+                assert e.water_ml is None
+            else:
+                assert e.water_ml == pytest.approx(w["litres_total_reig"] * 1000, rel=1e-9)
