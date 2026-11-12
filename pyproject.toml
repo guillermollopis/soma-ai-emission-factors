@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "saef"
+dynamic = ["version"]
+description = "SOMA AI Emission Factors: estimated carbon and water factors for AI inference, per million tokens"
+readme = "PYPI_README.md"
+requires-python = ">=3.9"
+license = "MIT AND CC-BY-4.0"
+license-files = ["LICENSE-CODE", "LICENSE"]
+authors = [{ name = "Guillermo Llopis-Garcia", email = "guillermollopis@somaai.earth" }]
+keywords = ["carbon-footprint", "ai-emissions", "llm", "scope-3", "csrd", "ghg-protocol", "emission-factors", "water-footprint"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = []
+
+[project.optional-dependencies]
+pandas = ["pandas"]
+test = ["pytest"]
+
+[project.scripts]
+saef = "saef.cli:main"
+
+[project.urls]
+Homepage = "https://somaai.earth/ai-footprint"
+Documentation = "https://somaai.earth/ai-footprint/how-to/track-ai-api-emissions"
+Repository = "https://github.com/guillermollopis/soma-ai-emission-factors"
+Dataset = "https://doi.org/10.5281/zenodo.20443585"
+Paper = "https://arxiv.org/abs/2606.10660"
+
+[tool.hatch.version]
+path = "src/saef/_core.py"
+pattern = 'DATASET_VERSION = "(?P<version>[^"]+)"'
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/saef"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/saef", "tests", "scripts", "PYPI_README.md", "LICENSE", "LICENSE-CODE", "pyproject.toml", "*.csv"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
