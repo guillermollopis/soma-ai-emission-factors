@@ -35,12 +35,14 @@ The core package has no dependencies. The integrations below estimate carbon and
 LiteLLM, installed with `pip install "saef[litellm]"`. The estimate is also attached to `response._hidden_params["saef"]`.
 
 ```python
+import time
 import litellm
 from saef.integrations.litellm import SaefLogger
 
 logger = SaefLogger(region="eu-west-1")
 litellm.callbacks = [logger]
 resp = litellm.completion(model="gpt-4o-mini", messages=[{"role": "user", "content": "Hello"}], mock_response="Hi there")
+time.sleep(1)  # LiteLLM runs success callbacks in a background thread
 t = logger.totals()
 print(t["calls"], t["input_tokens"], t["output_tokens"])
 print(f"{t['kg_co2e']:.3e} kg CO2e, {t['kg_co2e_high_case']:.3e} high case, {t['water_ml']:.4f} mL")
