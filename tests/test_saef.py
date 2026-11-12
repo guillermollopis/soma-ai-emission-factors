@@ -32,7 +32,7 @@ def test_factor_matches_csv(cls, region_id):
     t = f["terms"]
     assert t["electricity"] + t["embodied"] + t["construction"] == pytest.approx(f["kg_co2e_per_1m_effective_tokens"], rel=1e-4)
     assert t["training_per_1m_billed_tokens"] == float(r[f"class_{c}_training_kg_per_m_billed_tokens"])
-    assert f["version"] == saef.__version__ == "3.0.0"
+    assert f["version"] == saef.DATASET_VERSION == "3.0.0"
 
 
 def test_estimate_matches_hand_calculation():

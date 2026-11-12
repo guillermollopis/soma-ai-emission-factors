@@ -11,7 +11,7 @@ from ._core import (
     regions,
 )
 
-__version__ = DATASET_VERSION
+__version__ = "3.1.0"
 
 __all__ = [
     "DATASET_VERSION",

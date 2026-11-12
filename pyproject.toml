@@ -28,6 +28,8 @@ dependencies = []
 
 [project.optional-dependencies]
 pandas = ["pandas"]
+litellm = ["litellm"]
+langchain = ["langchain-core"]
 test = ["pytest"]
 
 [project.scripts]
@@ -41,8 +43,8 @@ Dataset = "https://doi.org/10.5281/zenodo.20443585"
 Paper = "https://arxiv.org/abs/2606.10660"
 
 [tool.hatch.version]
-path = "src/saef/_core.py"
-pattern = 'DATASET_VERSION = "(?P<version>[^"]+)"'
+path = "src/saef/__init__.py"
+pattern = '__version__ = "(?P<version>[^"]+)"'
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/saef"]
