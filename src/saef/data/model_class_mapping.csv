@@ -1,0 +1,30 @@
+model_pattern,provider,model_class,reasoning_multiplier,rationale,source,assigned
+gpt-4o-mini,OpenAI,class_a_small,1,"Mini designation = efficiency tier",OpenAI model page,2026-05
+gpt-4.1-mini,OpenAI,class_a_small,1,"Mini tier of 4.1",OpenAI model page,2026-09
+gpt-4.1-nano,OpenAI,class_a_small,1,"Nano tier",OpenAI model page,2026-09
+gpt-5-mini,OpenAI,class_a_small,1,"Mini tier of GPT-5",OpenAI model page,2026-09
+gpt-4o,OpenAI,class_b_mid,1,"Mid capability tier; 'How Hungry is AI' (arXiv 2505.09598) energy consistent with class B",paper Table 1,2026-05
+gpt-4.1,OpenAI,class_b_mid,1,"Successor of 4o at the same tier",OpenAI model page,2026-09
+gpt-4;gpt-4-turbo,OpenAI,class_c_large_moe,1,"Frontier closed model, no disclosed size",paper Table 1,2026-05
+gpt-5,OpenAI,class_c_large_moe,1,"Frontier closed model",OpenAI model page,2026-09
+o1;o3;o3-mini;o3-pro;o4-mini,OpenAI,class_c_large_moe,25,"Reasoning models: frontier class, hidden tokens 10-50x visible; mid multiplier 25",paper section 7,2026-09
+claude-haiku-*,Anthropic,class_a_small,1,"Haiku = small tier",paper Table 1,2026-05
+claude-sonnet-*;claude-3-7-sonnet,Anthropic,class_b_mid,1,"Sonnet = mid tier; 'How Hungry is AI' energy consistent with class B",paper Table 1,2026-05
+claude-opus-*,Anthropic,class_c_large_moe,1,"Opus = frontier tier",paper Table 1,2026-05
+gemini-*-flash;gemini-*-flash-lite,Google,class_a_small,1,"Flash = efficiency tier",Google model page,2026-05
+gemini-*-pro,Google,class_b_mid,1,"Pro = mid tier",Google model page,2026-05
+gemini-ultra,Google,class_c_large_moe,1,"Ultra = frontier tier",Google model page,2026-05
+llama-3.1-8b;llama-3.2-*;gemma-*,Meta/Google,class_a_small,1,"Open 8-12B dense",ML.ENERGY v3,2026-05
+llama-3.1-70b;llama-3.3-70b;qwen2.5-72b,Meta/Alibaba,class_b_mid,1,"Open 70B dense",ML.ENERGY v3,2026-05
+llama-4-scout;llama-4-maverick,Meta,class_b_mid,1,"MoE with 17B active parameters",Meta model card,2026-09
+llama-3.1-405b,Meta,class_c_large_dense,1,"Open 405B dense",ML.ENERGY v3,2026-05
+deepseek-v3;deepseek-chat,DeepSeek,class_c_large_moe,1,"MoE 671B total / 37B active",ML.ENERGY v3 (V3.1),2026-09
+deepseek-r1,DeepSeek,class_c_large_moe,25,"Reasoning variant of V3; hidden tokens as for the OpenAI o-series",ML.ENERGY v3 (V3.1),2026-09
+qwen3-235b-a22b,Alibaba,class_c_large_moe,1,"MoE 235B total / 22B active, the class C MoE calibration model",ML.ENERGY v3,2026-05
+mistral-small;ministral-*;mixtral-8x7b,Mistral,class_a_small,1,"Small tier; Mixtral 8x7B 13B active per TokenPowerBench",TokenPowerBench,2026-05
+mistral-medium;mixtral-8x22b,Mistral,class_b_mid,1,"Mid tier; 8x22B 39B active",Mistral docs,2026-09
+mistral-large,Mistral,class_c_large_moe,1,"123B dense frontier (Mistral's own LCA: 1.14 g per 400-token response)",Mistral LCA July 2025,2026-09
+sonar,Perplexity,class_a_small,1,"Base Sonar built on a small open model",Perplexity docs,2026-09
+sonar-pro,Perplexity,class_b_mid,1,"Pro tier",Perplexity docs,2026-09
+sonar-reasoning*,Perplexity,class_c_large_moe,25,"Reasoning tier",Perplexity docs,2026-09
+grok-*,xAI,class_c_large_moe,1,"Frontier closed model",xAI docs,2026-09
