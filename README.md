@@ -4,7 +4,7 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2606.10660-b31b1b.svg)](https://arxiv.org/abs/2606.10660)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-SOMA AI Emission Factors (SAEF) is an open, versioned dataset of estimated carbon and water factors for AI inference, per million tokens, by model class and by region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions. Every factor traces to a file and a source, and the Python calculator returns the file and column behind each number. Published by [SOMA AI](https://somaai.earth), Barcelona, under CC BY 4.0. The method paper, arXiv 2606.10660, is a preprint under peer review.
+SOMA AI Emission Factors (SAEF) is an open, versioned dataset of estimated carbon and water factors for AI inference, per million tokens, by model class and by region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions. Every factor traces to a file and a source, and the Python calculator returns the file and column behind each number. Published by [SOMA AI](https://somaai.earth), Barcelona, under CC BY 4.0. The method paper (arXiv 2606.10660) is accepted for publication in Sustainable Production and Consumption.
 
 This repository holds the v2.0.0 snapshot of the CSV files (17 cloud regions). The current release is Zenodo v3.0.0 (2026-10-15, version DOI [10.5281/zenodo.23371447](https://doi.org/10.5281/zenodo.23371447)), which covers 210 countries and economies, 27 US eGRID subregions and 143 cloud regions.
 
@@ -110,7 +110,7 @@ Prints `OK` and exits 0 if everything reconciles; otherwise lists each mismatch 
   year          = {2026},
   eprint        = {2606.10660},
   archivePrefix = {arXiv},
-  note          = {Under peer review at Sustainable Production and Consumption (Elsevier)}
+  note          = {Accepted for publication in Sustainable Production and Consumption (Elsevier)}
 }
 ```
 
@@ -121,7 +121,7 @@ Full derivations, all columns, boundary conditions, and the changelog are docume
 - Zenodo (concept DOI, always latest version): https://doi.org/10.5281/zenodo.20443585
 - Zenodo v3.0.0 record: https://zenodo.org/records/23371447
 - Website: https://somaai.earth/ai-footprint/factors
-- Paper (arXiv, preprint under peer review): https://arxiv.org/abs/2606.10660
+- Paper (arXiv preprint, accepted for publication in Sustainable Production and Consumption): https://arxiv.org/abs/2606.10660
 - Methodology: https://somaai.earth/ai-footprint/methodology
 - Developer docs / API: https://somaai.earth/ai-footprint/data
 - Free AI carbon footprint calculator for organisations: https://somaai.earth/ai-footprint/calculator
@@ -130,6 +130,12 @@ Full derivations, all columns, boundary conditions, and the changelog are docume
 - AI carbon footprint tools compared: https://somaai.earth/ai-footprint/guides/ai-carbon-footprint-tools-compared
 - AI environmental impact statistics, with sources: https://somaai.earth/ai-footprint/answers/ai-environmental-impact-statistics
 - Guía en español: https://somaai.earth/ai-footprint/guias/huella-de-carbono-ia-empresa
+- How-to: calculate your company's AI carbon footprint, step by step: https://somaai.earth/ai-footprint/how-to/calculate-company-ai-carbon-footprint
+- How-to: formula to estimate CO2e from LLM token usage: https://somaai.earth/ai-footprint/how-to/llm-token-co2e-formula
+- How-to: track emissions from AI API calls (Python and JS examples using this dataset): https://somaai.earth/ai-footprint/how-to/track-ai-api-emissions
+- AI carbon footprint by country and cloud region (209 countries ranked): https://somaai.earth/ai-footprint/answers/ai-carbon-footprint-by-country
+- AI water footprint by cloud region: https://somaai.earth/ai-footprint/answers/ai-water-footprint-by-region
+- Policy note, why AI providers should disclose where prompts run: https://somaai.earth/ai-footprint/answers/why-ai-providers-should-disclose-where-prompts-run
 - Contact: guillermollopis@somaai.earth
 
 ## License
