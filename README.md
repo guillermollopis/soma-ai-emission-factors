@@ -112,4 +112,4 @@ Pin a dataset in an inventory by the version DOI. The concept DOI always resolve
 
 ## License
 
-The data is licensed under CC BY 4.0, see [LICENSE](LICENSE). Attribution: Llopis-Garcia, G. (2026), SOMA AI Emission Factors (SAEF), https://doi.org/10.5281/zenodo.20443585. The Python package code in `src/` is proposed under MIT, see `LICENSE-CODE`.
+The data is licensed under CC BY 4.0, see [LICENSE](LICENSE). Attribution: Llopis-Garcia, G. (2026), SOMA AI Emission Factors (SAEF), https://doi.org/10.5281/zenodo.20443585. The Python package code in `src/` is licensed under MIT, see `LICENSE-CODE`.

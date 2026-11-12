@@ -1,4 +1,4 @@
-MIT License (PROPOSED, pending the author's decision)
+MIT License
 
 Applies to the Python code in src/, scripts/ and tests/. The dataset (CSV files)
 is licensed separately under CC BY 4.0, see the LICENSE file.
