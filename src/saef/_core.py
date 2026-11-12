@@ -4,14 +4,14 @@ from typing import Optional
 from . import _calc
 from ._calc import SaefError
 
-DATASET_VERSION = "3.0.0"
+DATASET_VERSION = "3.1.0"
 
 BIBTEX = """@misc{llopis2026somafactors,
   author       = {Llopis-Garcia, Guillermo},
   title        = {{SOMA AI Emission Factors (SAEF)}},
   year         = {2026},
   publisher    = {Zenodo},
-  version      = {v3.0.0},
+  version      = {v3.1.0},
   doi          = {10.5281/zenodo.20443585},
   url          = {https://doi.org/10.5281/zenodo.20443585}
 }

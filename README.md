@@ -6,7 +6,7 @@
 
 SOMA AI Emission Factors (SAEF) is an open, versioned dataset of estimated carbon and water factors for AI inference, by model class and by region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions. Every factor traces to a file and a source, and the calculator returns the file, line and column behind each number. Published by [SOMA AI](https://somaai.earth), Barcelona, under CC BY 4.0. The method paper (arXiv 2606.10660) is accepted for publication in Sustainable Production and Consumption.
 
-This repository holds the v3.0.0 tables (lifecycle boundary, dataset date 2026-10-02, version DOI [10.5281/zenodo.23371447](https://doi.org/10.5281/zenodo.23371447)) and the source of the `saef` Python package. The complete deposit, with the reference calculator, the generator scripts and the supplementary documents, is on [Zenodo](https://doi.org/10.5281/zenodo.20443585).
+This repository holds the v3.1.0 tables (lifecycle boundary, dataset date 2026-10-02, version DOI [10.5281/zenodo.24160409](https://doi.org/10.5281/zenodo.24160409); v3.1.0 is a corrective release of v3.0.0 that maps Azure canadaeast and Google Cloud northamerica-northeast1 to the Quebec grid and replaces the Central African Republic's rounded-to-zero grid row, see the release notes) and the source of the `saef` Python package. The complete deposit, with the reference calculator, the generator scripts and the supplementary documents, is on [Zenodo](https://doi.org/10.5281/zenodo.20443585).
 
 ## Install
 
@@ -139,7 +139,7 @@ The numbers are estimates, not measurements.
   title        = {{SOMA AI Emission Factors (SAEF)}},
   year         = {2026},
   publisher    = {Zenodo},
-  version      = {v3.0.0},
+  version      = {v3.1.0},
   doi          = {10.5281/zenodo.20443585},
   url          = {https://doi.org/10.5281/zenodo.20443585}
 }
@@ -159,6 +159,7 @@ Pin a dataset in an inventory by the version DOI. The concept DOI always resolve
 ## Links
 
 - Zenodo (concept DOI, always latest version): https://doi.org/10.5281/zenodo.20443585
+- Zenodo v3.1.0 record: https://zenodo.org/records/24160409
 - Zenodo v3.0.0 record: https://zenodo.org/records/23371447
 - Website: https://somaai.earth/ai-footprint/factors
 - Paper (arXiv preprint, accepted for publication in Sustainable Production and Consumption): https://arxiv.org/abs/2606.10660

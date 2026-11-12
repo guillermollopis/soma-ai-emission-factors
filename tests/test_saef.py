@@ -32,7 +32,7 @@ def test_factor_matches_csv(cls, region_id):
     t = f["terms"]
     assert t["electricity"] + t["embodied"] + t["construction"] == pytest.approx(f["kg_co2e_per_1m_effective_tokens"], rel=1e-4)
     assert t["training_per_1m_billed_tokens"] == float(r[f"class_{c}_training_kg_per_m_billed_tokens"])
-    assert f["version"] == saef.DATASET_VERSION == "3.0.0"
+    assert f["version"] == saef.DATASET_VERSION == "3.1.0"
 
 
 def test_estimate_matches_hand_calculation():
@@ -141,7 +141,7 @@ def test_parity_with_official_calculator():
         off = importlib.import_module("ai_inference_emissions")
     finally:
         sys.path.remove(folder)
-    for prov, reg in [(None, "eu-west-1"), ("azure", "swedencentral"), (None, "ap-southeast-1"), (None, "eu-south-2"), (None, "DEU"), (None, None)]:
+    for prov, reg in [(None, "eu-west-1"), ("azure", "swedencentral"), (None, "ap-southeast-1"), (None, "eu-south-2"), (None, "DEU"), (None, None), ("azure", "canadaeast"), ("gcp", "northamerica-northeast1"), (None, "CAF")]:
         for model in ("gpt-4o", "gpt-4o-mini", "o3", "llama-3.1-70b"):
             o = off.emissions(model=model, provider=prov, region=reg, input_tokens=10e6, output_tokens=2e6)
             e = saef.estimate(model=model, provider=prov, region=reg, input_tokens=10e6, output_tokens=2e6)
