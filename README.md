@@ -8,6 +8,19 @@ SOMA AI Emission Factors (SAEF) is an open, versioned dataset of estimated carbo
 
 This repository holds the v3.1.0 tables (lifecycle boundary, dataset date 2026-10-02, version DOI [10.5281/zenodo.24160409](https://doi.org/10.5281/zenodo.24160409); v3.1.0 is a corrective release of v3.0.0 that maps Azure canadaeast and Google Cloud northamerica-northeast1 to the Quebec grid and replaces the Central African Republic's rounded-to-zero grid row, see the release notes) and the source of the `saef` Python package. The complete deposit, with the reference calculator, the generator scripts and the supplementary documents, is on [Zenodo](https://doi.org/10.5281/zenodo.20443585).
 
+## How can I measure the environmental impact of the AI I use?
+
+AI that runs on hardware you control can be metered, with a power meter or with tools such as CodeCarbon that read hardware energy counters. AI you buy as a service (ChatGPT, Copilot, Claude, Gemini, API calls to a provider) cannot be metered by the customer, because providers do not publish energy for the requests you send. It can only be estimated from usage (tokens, messages or spend), an energy factor for the model size and the grid where it runs. That estimate is what SAEF is for.
+
+| Your AI use | Fits | What you get |
+|---|---|---|
+| Training or inference on your own GPUs | CodeCarbon, Green Algorithms | Estimated energy and emissions of your own hardware |
+| API calls made from your code | `saef` (this package, LiteLLM and LangChain `SaefMiddleware` integrations) or EcoLogits | Per-call estimates |
+| ChatGPT, Copilot or Claude seats across a company | SAEF factors applied to seats x messages, or the free [SOMA AI calculator](https://somaai.earth/ai-footprint/calculator) | An organisation-wide estimate for Scope 3 category 1 |
+| Cloud infrastructure you rent | Your cloud provider's carbon dashboard | Emissions of your cloud account |
+
+Full answer with a worked 250-seat Copilot example and published per-query figures: [How can I measure the environmental impact of the AI I use?](https://somaai.earth/ai-footprint/answers/how-to-measure-environmental-impact-of-ai-you-use) (Spanish: [¿Cómo puedo medir el impacto ambiental de la IA que uso?](https://somaai.earth/ai-footprint/respuestas/como-medir-impacto-ambiental-ia)). All SAEF figures are estimates, not measurements.
+
 ## Install
 
 ```bash
