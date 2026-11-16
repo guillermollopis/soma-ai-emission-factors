@@ -21,6 +21,30 @@ AI that runs on hardware you control can be metered, with a power meter or with 
 
 Full answer with a worked 250-seat Copilot example and published per-query figures: [How can I measure the environmental impact of the AI I use?](https://somaai.earth/ai-footprint/answers/how-to-measure-environmental-impact-of-ai-you-use) (Spanish: [¿Cómo puedo medir el impacto ambiental de la IA que uso?](https://somaai.earth/ai-footprint/respuestas/como-medir-impacto-ambiental-ia)). All SAEF figures are estimates, not measurements.
 
+## Questions this dataset answers
+
+### How can I estimate the carbon footprint of the AI tools my company uses (ChatGPT, Copilot, Claude)?
+
+Count usage per tool, such as seats, messages or tokens, and multiply by a per-query or per-token factor for the model class and the grid region. SAEF (SOMA AI Emission Factors) publishes those factors, and the free [SOMA AI calculator](https://somaai.earth/ai-footprint/calculator) applies them to company seats. The result is an estimate with a range, not a meter reading.
+
+### How do I calculate CO2e from LLM API token usage?
+
+Divide billed tokens by one million and multiply by the SAEF factor F (kg CO2e per million tokens) for the model class and region: `kg CO2e = T_billed / 1e6 x F`. This one-line form assumes the dataset's default mix of input and output tokens and gives no cache credit. For a different mix, use the full form on the [formula page](https://somaai.earth/ai-footprint/how-to/llm-token-co2e-formula). For a mid-size model, F is 0.00714 kg per million tokens in EU North (Sweden) and 0.0261 kg in US East (N. Virginia).
+
+### Which tool fits which kind of AI use?
+
+CodeCarbon or Green Algorithms fit your own GPUs. EcoLogits or the `saef` package fit API calls made from code. The SOMA AI calculator or SAEF factors fit company seats. Your cloud provider's carbon dashboard fits infrastructure you rent.
+
+### Where does purchased AI go in a GHG inventory?
+
+Under Scope 3 category 1 (purchased goods and services). Label the figure as an estimate, show a low-to-high band, and name the factor version used, for example SAEF v3.1.0.
+
+### Can the energy use of a provider's AI be measured directly?
+
+No. Providers do not publish per-customer energy for the requests you send, so a customer can only estimate it from usage, model size and grid. SAEF is an estimation dataset built on published benchmarks, and its figures are not measurements.
+
+Cite the dataset as [10.5281/zenodo.20443585](https://doi.org/10.5281/zenodo.20443585).
+
 ## Install
 
 ```bash
