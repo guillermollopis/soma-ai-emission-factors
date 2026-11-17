@@ -30,7 +30,7 @@ dependencies = []
 pandas = ["pandas"]
 litellm = ["litellm"]
 langchain = ["langchain>=1.0"]
-mcp = ["mcp>=1.2"]
+mcp = ["mcp>=1.2,<2"]
 test = ["pytest"]
 
 [project.scripts]

@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.1 (2026-11-17)
+
+- Pin the `mcp` extra to `mcp>=1.2,<2`. mcp 2.x renamed FastMCP, so `saef-mcp` failed to start on a fresh install of 3.3.0.
+
 ## 3.3.0
 
 - Added an MCP server, `saef-mcp` (module `saef.mcp_server`), so AI agents in Claude Desktop, Claude Code, Cursor and other MCP clients can estimate carbon, energy and water. Tools are `estimate_footprint`, `estimate_chat_usage`, `model_class`, `list_regions` and `compare_regions`, plus the resource `saef://about`.

@@ -25,7 +25,7 @@ print(r.kg_co2e, r.kg_co2e_high_case)             # central and conservative hig
 print(r.water_ml)                                 # mL, or None where the region has no water factor
 for s in r.provenance[:3]:
     print(s["file"], s["line"], s["column"])      # the file, line and column behind each number
-print(len(saef.regions()), saef.__version__, saef.DATASET_VERSION)  # 143 cloud regions, 3.3.0, 3.1.0
+print(len(saef.regions()), saef.__version__, saef.DATASET_VERSION)  # 143 cloud regions, 3.3.1, 3.1.0
 print(saef.citation())
 ```
 
