@@ -43,6 +43,22 @@ Under Scope 3 category 1 (purchased goods and services). Label the figure as an 
 
 No. Providers do not publish per-customer energy for the requests you send, so a customer can only estimate it from usage, model size and grid. SAEF is an estimation dataset built on published benchmarks, and its figures are not measurements.
 
+### How much electricity does one AI prompt use?
+
+SAEF estimates 0.03 to 0.37 Wh at facility level for a 1,210-token chat exchange, from a small (class A) to a large (class C) model, and 0.099 Wh for a mid-size (class B) model. Published figures for comparison are 0.24 Wh for the median Gemini Apps text prompt (Google, August 2025) and about 0.3 Wh for a GPT-4o query (Epoch AI). Long documents, coding agents and reasoning modes process far more tokens and use far more.
+
+### How much water does ChatGPT or another AI chatbot use per prompt?
+
+SAEF estimates 0.15 to 0.94 mL for a mid-size chat exchange, depending on the cloud region, because the region changes the water, not the watt-hours. Google reports 0.26 mL for its median Gemini Apps text prompt. The viral bottle-of-water-per-email figure (about 519 mL, Washington Post and UC Riverside, 2024) counted the water behind the electricity with mid-2024 assumptions. Details on the [water page](https://somaai.earth/ai-footprint/guides/ai-water-footprint).
+
+### How do I measure the carbon footprint of my own AI use, as one person?
+
+Count your messages, pick a model class and apply the grid of the region. With a mid-size model, a reasoning uplift and a US East grid, 20 chat messages a day for a year come to about 0.4 kg CO2e (band 0.2 to 1 kg), and about 0.1 kg on a Swedish grid. Coding agents, long documents and image or video generation add much more per request. A step-by-step answer is on [How can I measure the environmental impact of the AI I use?](https://somaai.earth/ai-footprint/answers/how-to-measure-environmental-impact-of-ai-you-use)
+
+### Which AI model has the lowest footprint?
+
+Model size class and serving region decide most of the estimate, more than the brand. Smaller models and low-carbon grids give the lowest carbon per exchange, but low-carbon grids are not always the lowest-water ones. Per-model estimates are on the [models compared page](https://somaai.earth/ai-footprint/answers/ai-models-carbon-footprint-compared).
+
 Cite the dataset as [10.5281/zenodo.20443585](https://doi.org/10.5281/zenodo.20443585).
 
 ## Install
