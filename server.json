@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.guillermollopis/saef",
+  "title": "SOMA AI Emission Factors (SAEF)",
+  "description": "Estimate carbon, energy and water of AI inference from tokens, model and region. Estimates, not measurements.",
+  "repository": {
+    "url": "https://github.com/guillermollopis/soma-ai-emission-factors",
+    "source": "github"
+  },
+  "websiteUrl": "https://somaai.earth/ai-footprint",
+  "version": "3.3.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "saef",
+      "version": "3.3.0",
+      "runtimeHint": "uvx",
+      "transport": { "type": "stdio" }
+    }
+  ]
+}

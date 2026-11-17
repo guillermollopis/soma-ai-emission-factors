@@ -25,7 +25,7 @@ print(r.kg_co2e, r.kg_co2e_high_case)             # central and conservative hig
 print(r.water_ml)                                 # mL, or None where the region has no water factor
 for s in r.provenance[:3]:
     print(s["file"], s["line"], s["column"])      # the file, line and column behind each number
-print(len(saef.regions()), saef.__version__, saef.DATASET_VERSION)  # 143 cloud regions, 3.2.0, 3.1.0
+print(len(saef.regions()), saef.__version__, saef.DATASET_VERSION)  # 143 cloud regions, 3.3.0, 3.1.0
 print(saef.citation())
 ```
 
@@ -138,6 +138,54 @@ B 2.231e-05 3.235e-05 0.0785
 
 Every figure is an estimate. Models the dataset treats as out of scope, such as embeddings, are skipped and counted in `totals()["skipped_calls"]`.
 
+## MCP server
+
+SAEF ships an MCP server so an AI agent can estimate the carbon, energy and water of AI usage on request. It runs locally over stdio and needs the optional `mcp` extra. The core package stays dependency-free.
+
+```bash
+pip install "saef[mcp]"
+```
+
+Claude Code.
+
+```bash
+claude mcp add saef -- saef-mcp
+```
+
+Claude Desktop, in `claude_desktop_config.json`.
+
+```json
+{
+  "mcpServers": {
+    "saef": { "command": "saef-mcp" }
+  }
+}
+```
+
+Cursor, in `.cursor/mcp.json`.
+
+```json
+{
+  "mcpServers": {
+    "saef": { "command": "saef-mcp" }
+  }
+}
+```
+
+If `saef-mcp` is not on your PATH, use `uvx --from "saef[mcp]" saef-mcp` as the command instead.
+
+Tools.
+
+- `estimate_footprint(tokens, model, region="global")` returns carbon in kg and g CO2e with a central and a high case, facility energy in Wh, water in mL where the region has a water factor, the model class, the region used, the dataset version and a provenance trail.
+- `estimate_chat_usage(messages, model, region="global")` returns the same for chat exchanges, using the dataset's short-chat default of 1,210 tokens per exchange (928 input, 282 output).
+- `model_class(model)` returns the class letter (A small, B mid-size, C large) and a description.
+- `list_regions()` returns the accepted region codes, with names for cloud regions and countries.
+- `compare_regions(tokens, model, regions)` returns carbon and water per region, sorted from lowest to highest carbon.
+
+The server also exposes the resource `saef://about` with the licence, DOI and method paper. Every figure is an estimate, not a measurement.
+
+Example prompt, "Using SAEF, what is the carbon and water footprint of 2 million gpt-4o tokens a month in eu-north-1 compared with us-east-1?"
+
 ## What the numbers are
 
 The factors follow the v3 lifecycle boundary. An estimate has four terms: electricity, embodied hardware and data-centre construction (charged on effective tokens) and amortised training (charged on billed tokens).
@@ -181,3 +229,5 @@ Method paper: Llopis-Garcia, G. (2026), Accounting for Purchased Artificial Inte
 - Docs: https://somaai.earth/ai-footprint/how-to/track-ai-api-emissions
 - Repository: https://github.com/guillermollopis/soma-ai-emission-factors
 - Paper: https://arxiv.org/abs/2606.10660
+
+mcp-name: io.github.guillermollopis/saef

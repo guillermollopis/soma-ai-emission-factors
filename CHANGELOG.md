@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.0
+
+- Added an MCP server, `saef-mcp` (module `saef.mcp_server`), so AI agents in Claude Desktop, Claude Code, Cursor and other MCP clients can estimate carbon, energy and water. Tools are `estimate_footprint`, `estimate_chat_usage`, `model_class`, `list_regions` and `compare_regions`, plus the resource `saef://about`.
+- New optional extra `mcp` (`pip install "saef[mcp]"`). The core package is still dependency-free and imports `mcp` only inside `saef.mcp_server`.
+- Dataset unchanged, still v3.1.0.
+
 ## 3.2.0
 
 - Added `saef.integrations.langchain.SaefMiddleware` for LangChain v1 agents. It hooks `wrap_model_call` and `awrap_model_call`, records one estimate per model call, exposes `totals()` and `reset()`, and with `attach=True` writes the estimate to `AIMessage.response_metadata["saef"]`. The existing `SaefCallbackHandler` is unchanged.
