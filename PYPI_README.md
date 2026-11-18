@@ -2,6 +2,8 @@
 
 Python access to SAEF, the SOMA AI Emission Factors. SAEF is an open, versioned dataset of estimated carbon and water factors for AI inference, by model class and region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. This package bundles the CSV files and gives you a small API and command line on top of them. It has no dependencies beyond the standard library.
 
+Use it to track the estimated carbon and water footprint of OpenAI, Anthropic and other LLM API calls from the token usage each response already reports, with a LiteLLM callback, a LangChain handler, an MCP server, or one function call on a response object. The method is peer reviewed, published in Sustainable Production and Consumption 70 (2026) 320-347 (https://doi.org/10.1016/j.spc.2026.11.003).
+
 Every number comes with the file, column and row it was read from, so you can trace an estimate back to the dataset.
 
 ## Install
@@ -11,6 +13,18 @@ pip install saef
 ```
 
 For pandas users, `pip install "saef[pandas]"` adds the optional extra. The framework integrations below use `saef[litellm]` and `saef[langchain]`.
+
+## Track OpenAI and Anthropic API calls
+
+```python
+from saef.integrations.openai import estimate_from_response
+
+resp = client.chat.completions.create(model="gpt-4o-mini", messages=[...])  # or client.messages.create(...) with Anthropic
+e = estimate_from_response(resp, region="eu-west-1")
+print(e.kg_co2e, e.kg_co2e_high_case, e.water_ml)  # kg CO2e central and high case, water in mL
+```
+
+No SDK import is needed, so the same call works on OpenAI Chat Completions, OpenAI Responses and Anthropic Messages objects, or the same shapes as dicts. Running totals per model and a JSON lines log are covered under Integrations below.
 
 ## Example
 
@@ -25,7 +39,7 @@ print(r.kg_co2e, r.kg_co2e_high_case)             # central and conservative hig
 print(r.water_ml)                                 # mL, or None where the region has no water factor
 for s in r.provenance[:3]:
     print(s["file"], s["line"], s["column"])      # the file, line and column behind each number
-print(len(saef.regions()), saef.__version__, saef.DATASET_VERSION)  # 143 cloud regions, 3.3.1, 3.1.0
+print(len(saef.regions()), saef.__version__, saef.DATASET_VERSION)  # 143 cloud regions, 3.3.2, 3.1.0
 print(saef.citation())
 ```
 
@@ -221,13 +235,13 @@ Dataset (concept DOI, always the latest version): https://doi.org/10.5281/zenodo
 }
 ```
 
-Method paper: Llopis-Garcia, G. (2026), Accounting for Purchased Artificial Intelligence Inference in Corporate Greenhouse Gas Inventories, a Token-Based Method. arXiv 2606.10660, accepted for publication in Sustainable Production and Consumption.
+Method paper: Llopis-Garcia, G. (2026), Accounting for Purchased Artificial Intelligence Inference in Corporate Greenhouse Gas Inventories, a Token-Based Method. Sustainable Production and Consumption 70 (2026) 320-347. https://doi.org/10.1016/j.spc.2026.11.003
 
 ## Links
 
 - Homepage: https://somaai.earth/ai-footprint
 - Docs: https://somaai.earth/ai-footprint/how-to/track-ai-api-emissions
 - Repository: https://github.com/guillermollopis/soma-ai-emission-factors
-- Paper: https://arxiv.org/abs/2606.10660
+- Paper: https://doi.org/10.1016/j.spc.2026.11.003 (preprint https://arxiv.org/abs/2606.10660)
 
 mcp-name: io.github.guillermollopis/saef

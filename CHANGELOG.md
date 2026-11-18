@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.2 (2026-11-18)
+
+- The method paper is published: Sustainable Production and Consumption 70 (2026) 320-347, doi 10.1016/j.spc.2026.11.003. `saef.citation()` now returns an `@article` entry with the DOI, and the MCP server cites the journal version.
+- PyPI description and keywords now say what the package is used for, tracking the footprint of OpenAI, Anthropic, LiteLLM and LangChain calls. README opens with the response-object example.
+- Dataset unchanged, still v3.1.0.
+
 ## 3.3.1 (2026-11-17)
 
 - Pin the `mcp` extra to `mcp>=1.2,<2`. mcp 2.x renamed FastMCP, so `saef-mcp` failed to start on a fresh install of 3.3.0.

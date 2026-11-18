@@ -16,6 +16,7 @@ CLASS_DESCRIPTIONS = {
 
 DOI = "10.5281/zenodo.20443585"
 ARXIV = "2606.10660"
+PAPER_DOI = "10.1016/j.spc.2026.11.003"
 HOMEPAGE = "https://somaai.earth/ai-footprint"
 NOTE = "Estimate, not a measurement. SOMA AI Emission Factors (SAEF) factors are modelled from published benchmarks and grid data."
 
@@ -46,7 +47,7 @@ def _report(e):
         "dataset_version": e.version,
         "warnings": e.warnings,
         "provenance": e.provenance,
-        "citation": f"SOMA AI Emission Factors (SAEF) v{e.version}, doi:{DOI}; method paper arXiv:{ARXIV}",
+        "citation": f"SOMA AI Emission Factors (SAEF) v{e.version}, doi:{DOI}; method paper doi:{PAPER_DOI}",
         "note": NOTE,
     }
     if grid > 0:
@@ -190,7 +191,7 @@ def about() -> str:
         "for Scope 3 category 1 reporting. All figures are estimates, not measurements.\n"
         "Licence: data CC BY 4.0, code MIT.\n"
         f"Dataset DOI: {DOI} (https://doi.org/{DOI})\n"
-        f"Method paper: arXiv {ARXIV} (https://arxiv.org/abs/{ARXIV})\n"
+        f"Method paper: Sustainable Production and Consumption 70 (2026) 320-347, doi {PAPER_DOI} (https://doi.org/{PAPER_DOI}), preprint arXiv {ARXIV}\n"
         f"Homepage: {HOMEPAGE}\n"
     )
 

@@ -16,13 +16,15 @@ BIBTEX = """@misc{llopis2026somafactors,
   url          = {https://doi.org/10.5281/zenodo.20443585}
 }
 
-@misc{llopis2026accounting,
-  author        = {Llopis-Garcia, Guillermo},
-  title         = {Accounting for Purchased Artificial Intelligence Inference in Corporate Greenhouse Gas Inventories: A Token-Based Method},
-  year          = {2026},
-  eprint        = {2606.10660},
-  archivePrefix = {arXiv},
-  note          = {Accepted for publication in Sustainable Production and Consumption (Elsevier)}
+@article{llopis2026accounting,
+  author  = {Llopis-Garcia, Guillermo},
+  title   = {Accounting for purchased artificial intelligence inference in corporate greenhouse gas inventories: A token-based method},
+  journal = {Sustainable Production and Consumption},
+  volume  = {70},
+  pages   = {320--347},
+  year    = {2026},
+  doi     = {10.1016/j.spc.2026.11.003},
+  url     = {https://doi.org/10.1016/j.spc.2026.11.003}
 }
 """
 

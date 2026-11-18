@@ -5,13 +5,13 @@ build-backend = "hatchling.build"
 [project]
 name = "saef"
 dynamic = ["version"]
-description = "SOMA AI Emission Factors: estimated carbon and water factors for AI inference, per million tokens"
+description = "Estimate the carbon and water footprint of AI API calls (OpenAI, Anthropic, LiteLLM, LangChain) with SAEF, open per-token emission factors"
 readme = "PYPI_README.md"
 requires-python = ">=3.9"
 license = "MIT AND CC-BY-4.0"
 license-files = ["LICENSE-CODE", "LICENSE"]
 authors = [{ name = "Guillermo Llopis-Garcia", email = "guillermollopis@somaai.earth" }]
-keywords = ["carbon-footprint", "ai-emissions", "llm", "scope-3", "csrd", "ghg-protocol", "emission-factors", "water-footprint"]
+keywords = ["carbon-footprint", "ai-emissions", "llm", "scope-3", "csrd", "ghg-protocol", "emission-factors", "water-footprint", "openai", "anthropic", "litellm", "langchain", "mcp", "green-ai", "carbon-tracking", "ai-carbon-footprint", "sustainability"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -23,6 +23,8 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Topic :: System :: Monitoring",
 ]
 dependencies = []
 

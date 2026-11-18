@@ -110,6 +110,7 @@ def test_coverage_counts_and_citation():
     assert len(saef.grids()) == 240
     assert "eu-west-1" in saef.regions()
     assert "10.5281/zenodo.20443585" in saef.citation()
+    assert "10.1016/j.spc.2026.11.003" in saef.citation()
 
 
 def run_cli(*args):
