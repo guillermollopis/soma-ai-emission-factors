@@ -37,19 +37,28 @@ keywords:
   - inference
 preferred-citation:
   type: article
-  status: preprint
-  title: "Accounting for Purchased Artificial Intelligence Inference in Corporate Greenhouse Gas Inventories: A Token-Based Method"
+  title: "Accounting for purchased artificial intelligence inference in corporate greenhouse gas inventories: A token-based method"
   authors:
     - family-names: Llopis-Garcia
       given-names: Guillermo
       orcid: "https://orcid.org/0009-0001-9985-6516"
       affiliation: SOMA AI
   year: 2026
+  journal: "Sustainable Production and Consumption"
+  volume: 70
+  start: 320
+  end: 347
+  publisher:
+    name: Elsevier
+  doi: 10.1016/j.spc.2026.11.003
   identifiers:
+    - type: doi
+      value: 10.1016/j.spc.2026.11.003
+      description: "Journal article DOI"
     - type: other
       value: "arXiv:2606.10660"
       description: "arXiv identifier"
     - type: url
       value: "https://arxiv.org/abs/2606.10660"
       description: "arXiv abstract page"
-  notes: "Preprint. Accepted for publication in Sustainable Production and Consumption (Elsevier), not yet published."
+  notes: "Published version of record. The arXiv preprint is free to read."

@@ -1,10 +1,11 @@
 # SOMA AI Emission Factors (SAEF)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20443585.svg)](https://doi.org/10.5281/zenodo.20443585)
+[![Paper DOI](https://img.shields.io/badge/DOI-10.1016/j.spc.2026.11.003-blue.svg)](https://doi.org/10.1016/j.spc.2026.11.003)
 [![arXiv](https://img.shields.io/badge/arXiv-2606.10660-b31b1b.svg)](https://arxiv.org/abs/2606.10660)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-SOMA AI Emission Factors (SAEF) is an open, versioned dataset of estimated carbon and water factors for AI inference, by model class and by region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions. Every factor traces to a file and a source, and the calculator returns the file, line and column behind each number. Published by [SOMA AI](https://somaai.earth), Barcelona, under CC BY 4.0. The method paper (arXiv 2606.10660) is accepted for publication in Sustainable Production and Consumption.
+SOMA AI Emission Factors (SAEF) is an open, versioned dataset of estimated carbon and water factors for AI inference, by model class and by region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions. Every factor traces to a file and a source, and the calculator returns the file, line and column behind each number. Published by [SOMA AI](https://somaai.earth), Barcelona, under CC BY 4.0. The method is peer reviewed and published in Sustainable Production and Consumption 70 (2026) 320-347, https://doi.org/10.1016/j.spc.2026.11.003 (free preprint arXiv 2606.10660).
 
 This repository holds the v3.1.0 tables (lifecycle boundary, dataset date 2026-10-02, version DOI [10.5281/zenodo.24160409](https://doi.org/10.5281/zenodo.24160409); v3.1.0 is a corrective release of v3.0.0 that maps Azure canadaeast and Google Cloud northamerica-northeast1 to the Quebec grid and replaces the Central African Republic's rounded-to-zero grid row, see the release notes) and the source of the `saef` Python package. The complete deposit, with the reference calculator, the generator scripts and the supplementary documents, is on [Zenodo](https://doi.org/10.5281/zenodo.20443585).
 
@@ -278,13 +279,18 @@ The numbers are estimates, not measurements.
   url          = {https://doi.org/10.5281/zenodo.20443585}
 }
 
-@misc{llopis2026accounting,
+@article{llopis2026accounting,
   author        = {Llopis-Garcia, Guillermo},
-  title         = {Accounting for Purchased Artificial Intelligence Inference in Corporate Greenhouse Gas Inventories: A Token-Based Method},
+  title         = {Accounting for purchased artificial intelligence inference in corporate greenhouse gas inventories: A token-based method},
+  journal       = {Sustainable Production and Consumption},
+  volume        = {70},
+  pages         = {320--347},
   year          = {2026},
+  publisher     = {Elsevier},
+  doi           = {10.1016/j.spc.2026.11.003},
+  url           = {https://doi.org/10.1016/j.spc.2026.11.003},
   eprint        = {2606.10660},
-  archivePrefix = {arXiv},
-  note          = {Accepted for publication in Sustainable Production and Consumption (Elsevier)}
+  archivePrefix = {arXiv}
 }
 ```
 
@@ -299,7 +305,8 @@ Pin a dataset in an inventory by the version DOI. The concept DOI always resolve
 - Zenodo v3.1.0 record: https://zenodo.org/records/24160409
 - Zenodo v3.0.0 record: https://zenodo.org/records/23371447
 - Website: https://somaai.earth/ai-footprint/factors
-- Paper (arXiv preprint, accepted for publication in Sustainable Production and Consumption): https://arxiv.org/abs/2606.10660
+- Paper (Sustainable Production and Consumption, 2026): https://doi.org/10.1016/j.spc.2026.11.003
+- Paper preprint (free, arXiv): https://arxiv.org/abs/2606.10660
 - Methodology: https://somaai.earth/ai-footprint/methodology
 - Developer docs / API: https://somaai.earth/ai-footprint/data
 - Free AI carbon footprint calculator for organisations: https://somaai.earth/ai-footprint/calculator
