@@ -36,6 +36,10 @@ Divide billed tokens by one million and multiply by the SAEF factor F (kg CO2e p
 
 CodeCarbon or Green Algorithms fit your own GPUs. EcoLogits or the `saef` package fit API calls made from code. The SOMA AI calculator or SAEF factors fit company seats. Your cloud provider's carbon dashboard fits infrastructure you rent.
 
+### Can CodeCarbon track API calls to OpenAI, Anthropic or Gemini?
+
+No. CodeCarbon reads the power of hardware you run, and its own README points users of remote APIs to EcoLogits. For API-based LLM usage you need an estimate from token counts. EcoLogits does that per call by wrapping the provider SDKs. The `saef` package does it from the response object or from billing totals (`pip install saef`, then `saef.estimate(...)` or `estimate_from_response(resp)`), with a LiteLLM callback and LangChain middleware. The two draw the boundary differently (SAEF adds amortised training), so pick one and state which.
+
 ### Where does purchased AI go in a GHG inventory?
 
 Under Scope 3 category 1 (purchased goods and services). Label the figure as an estimate, show a low-to-high band, and name the factor version used, for example SAEF v3.1.0.
