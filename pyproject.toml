@@ -34,7 +34,7 @@ litellm = ["litellm"]
 langchain = ["langchain>=1.0"]
 llamaindex = ["llama-index-core>=0.10.20"]
 haystack = ["haystack-ai>=2.0"]
-mcp = ["mcp>=1.2,<2"]
+mcp = ["mcp>=1.2,<1.30"]
 test = ["pytest"]
 
 [project.scripts]
