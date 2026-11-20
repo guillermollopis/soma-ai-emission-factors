@@ -1,0 +1,86 @@
+{
+  "name": "saef",
+  "version": "3.4.0",
+  "description": "Estimate the carbon, energy and water of LLM API calls (OpenAI, Anthropic, Vercel AI SDK) from token usage, with open per-token emission factors by model class and cloud region (SAEF, CC BY 4.0)",
+  "license": "MIT AND CC-BY-4.0",
+  "author": "Guillermo Llopis-Garcia <guillermollopis@somaai.earth>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guillermollopis/soma-ai-emission-factors.git",
+    "directory": "js"
+  },
+  "homepage": "https://github.com/guillermollopis/soma-ai-emission-factors",
+  "bugs": "https://github.com/guillermollopis/soma-ai-emission-factors/issues",
+  "keywords": [
+    "carbon-footprint",
+    "ai-emissions",
+    "llm",
+    "openai",
+    "anthropic",
+    "vercel-ai-sdk",
+    "ai-sdk",
+    "scope-3",
+    "green-ai",
+    "emission-factors",
+    "water-footprint"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./ai-sdk": {
+      "import": {
+        "types": "./dist/ai-sdk.d.ts",
+        "default": "./dist/ai-sdk.js"
+      },
+      "require": {
+        "types": "./dist/ai-sdk.d.cts",
+        "default": "./dist/ai-sdk.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE*"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "build:data": "python scripts/build-data.py",
+    "parity:dump": "python scripts/dump-parity.py",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "ai": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "ai": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@ai-sdk/provider": "^4.0.39",
+    "@types/node": "^26.6.6",
+    "ai": "^7.0.177",
+    "tsup": "^9.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.1"
+  }
+}
