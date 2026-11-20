@@ -5,13 +5,13 @@ build-backend = "hatchling.build"
 [project]
 name = "saef"
 dynamic = ["version"]
-description = "Estimate the carbon and water footprint of AI API calls (OpenAI, Anthropic, LiteLLM, LangChain) with SAEF, open per-token emission factors"
+description = "Estimate the carbon and water footprint of AI API calls (OpenAI, Anthropic, LiteLLM, LangChain, LlamaIndex, Haystack) with SAEF, open per-token emission factors"
 readme = "PYPI_README.md"
 requires-python = ">=3.9"
 license = "MIT AND CC-BY-4.0"
 license-files = ["LICENSE-CODE", "LICENSE"]
 authors = [{ name = "Guillermo Llopis-Garcia", email = "guillermollopis@somaai.earth" }]
-keywords = ["carbon-footprint", "ai-emissions", "llm", "scope-3", "csrd", "ghg-protocol", "emission-factors", "water-footprint", "openai", "anthropic", "litellm", "langchain", "mcp", "green-ai", "carbon-tracking", "ai-carbon-footprint", "sustainability"]
+keywords = ["carbon-footprint", "ai-emissions", "llm", "scope-3", "csrd", "ghg-protocol", "emission-factors", "water-footprint", "openai", "anthropic", "litellm", "langchain", "llamaindex", "haystack", "mcp", "green-ai", "carbon-tracking", "ai-carbon-footprint", "sustainability"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -32,6 +32,8 @@ dependencies = []
 pandas = ["pandas"]
 litellm = ["litellm"]
 langchain = ["langchain>=1.0"]
+llamaindex = ["llama-index-core>=0.10.20"]
+haystack = ["haystack-ai>=2.0"]
 mcp = ["mcp>=1.2,<2"]
 test = ["pytest"]
 

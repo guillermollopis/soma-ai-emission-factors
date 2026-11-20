@@ -249,3 +249,161 @@ def test_langchain_middleware_skips_without_usage_and_falls_back_to_request_mode
     assert mw.totals()["calls"] == 0
     mw.wrap_model_call(R(), lambda r: AIMessage(content="x", usage_metadata={"input_tokens": 10, "output_tokens": 5, "total_tokens": 15}))
     assert mw.totals()["calls"] == 1
+
+
+def _li_chat_end(raw=None, additional_kwargs=None, span_id="s1"):
+    from llama_index.core.base.llms.types import ChatMessage, ChatResponse, MessageRole
+    from llama_index.core.instrumentation.events.llm import LLMChatEndEvent
+
+    msg = ChatMessage(role=MessageRole.ASSISTANT, content="hi")
+    resp = ChatResponse(message=msg, raw=raw, additional_kwargs=additional_kwargs or {})
+    return LLMChatEndEvent(messages=[msg], response=resp, span_id=span_id)
+
+
+def test_llamaindex_chat_end_raw_usage_with_cache():
+    pytest.importorskip("llama_index.core")
+    from saef.integrations.llamaindex import SaefEventHandler
+
+    h = SaefEventHandler(region="eu-west-1")
+    raw = {"model": "gpt-4o", "usage": {"prompt_tokens": 1000, "completion_tokens": 200, "prompt_tokens_details": {"cached_tokens": 400}}}
+    h.handle(_li_chat_end(raw=raw))
+    d = direct(model="gpt-4o", region="eu-west-1", input_tokens=600, cached_input_tokens=400, output_tokens=200)
+    t = h.totals()
+    assert t["calls"] == 1 and t["kg_co2e"] == d.kg_co2e and t["kg_co2e_high_case"] == d.kg_co2e_high_case
+
+
+def test_llamaindex_model_from_start_event_and_additional_kwargs(tmp_path):
+    pytest.importorskip("llama_index.core")
+    from llama_index.core.instrumentation.events.llm import LLMCompletionEndEvent, LLMCompletionStartEvent
+    from llama_index.core.base.llms.types import CompletionResponse
+
+    from saef.integrations.llamaindex import SaefEventHandler
+
+    log = tmp_path / "li.jsonl"
+    h = SaefEventHandler(region="eu-west-1", log_path=str(log))
+    h.handle(LLMCompletionStartEvent(prompt="p", additional_kwargs={}, model_dict={"model": "gpt-4o-mini"}, span_id="c1"))
+    resp = CompletionResponse(text="x", additional_kwargs={"prompt_tokens": 100, "completion_tokens": 20})
+    h.handle(LLMCompletionEndEvent(prompt="p", response=resp, span_id="c1"))
+    d = direct(model="gpt-4o-mini", region="eu-west-1", input_tokens=100, output_tokens=20)
+    assert h.totals()["kg_co2e"] == d.kg_co2e
+    assert len(log.read_text().splitlines()) == 1
+    assert h._models == {}
+
+
+def test_llamaindex_skips_without_model_or_usage():
+    pytest.importorskip("llama_index.core")
+    from saef.integrations.llamaindex import SaefEventHandler
+
+    h = SaefEventHandler(region="eu-west-1")
+    h.handle(_li_chat_end(raw={"usage": {"prompt_tokens": 10, "completion_tokens": 5}}))
+    h.handle(_li_chat_end(raw={"model": "gpt-4o"}))
+    h.handle(_li_chat_end(raw=None))
+    assert h.totals()["calls"] == 0
+    h.handle(_li_chat_end(raw={"model": "gpt-4o", "usage": {"prompt_tokens": 10, "completion_tokens": 5}}))
+    assert h.totals()["calls"] == 1
+    h.reset()
+    assert h.totals()["calls"] == 0
+
+
+def test_llamaindex_dispatcher_end_to_end():
+    pytest.importorskip("llama_index.core")
+    from llama_index.core.base.llms.types import ChatMessage, ChatResponse, LLMMetadata
+    from llama_index.core.instrumentation import get_dispatcher
+    from llama_index.core.llms import CustomLLM
+    from llama_index.core.llms.callbacks import llm_chat_callback
+
+    from saef.integrations.llamaindex import SaefEventHandler
+
+    class FakeLLM(CustomLLM):
+        @property
+        def metadata(self):
+            return LLMMetadata(model_name="gpt-4o")
+
+        @llm_chat_callback()
+        def chat(self, messages, **kwargs):
+            raw = {"model": "gpt-4o", "usage": {"prompt_tokens": 50, "completion_tokens": 10}}
+            return ChatResponse(message=ChatMessage(role="assistant", content="hi"), raw=raw)
+
+        def complete(self, prompt, formatted=False, **kwargs):
+            raise NotImplementedError
+
+        def stream_complete(self, prompt, formatted=False, **kwargs):
+            raise NotImplementedError
+
+    h = SaefEventHandler(region="eu-west-1").register()
+    try:
+        FakeLLM().chat([ChatMessage(role="user", content="Hello")])
+    finally:
+        get_dispatcher().event_handlers.remove(h)
+    d = direct(model="gpt-4o", region="eu-west-1", input_tokens=50, output_tokens=10)
+    assert h.totals()["calls"] == 1 and h.totals()["kg_co2e"] == d.kg_co2e
+
+
+def test_haystack_chat_replies_openai_and_anthropic_meta():
+    pytest.importorskip("haystack")
+    from haystack.dataclasses import ChatMessage
+
+    from saef.integrations.haystack import SaefTracker
+
+    t = SaefTracker(region="eu-west-1")
+    openai_reply = ChatMessage.from_assistant("hi", meta={
+        "model": "gpt-4o", "finish_reason": "stop",
+        "usage": {"prompt_tokens": 1000, "completion_tokens": 200, "prompt_tokens_details": {"cached_tokens": 400}}})
+    anthropic_reply = ChatMessage.from_assistant("hi", meta={
+        "model": "claude-3-5-sonnet-20241022", "usage": {"input_tokens": 100, "output_tokens": 20, "cache_read_input_tokens": 50}})
+    out = t.run(replies=[openai_reply, anthropic_reply])
+    assert out["replies"] == [openai_reply, anthropic_reply] and len(out["saef"]) == 2
+    d = direct(model="gpt-4o", region="eu-west-1", input_tokens=600, cached_input_tokens=400, output_tokens=200)
+    assert out["saef"][0]["kg_co2e"] == d.kg_co2e
+    tot = t.totals()
+    assert tot["calls"] == 2 and tot["cached_input_tokens"] == 450
+
+
+def test_haystack_text_generator_meta_and_skips(tmp_path):
+    pytest.importorskip("haystack")
+    from haystack.dataclasses import ChatMessage
+
+    from saef.integrations.haystack import SaefTracker
+
+    log = tmp_path / "hs.jsonl"
+    t = SaefTracker(region="eu-west-1", log_path=str(log))
+    out = t.run(replies=["a", "b", "c"], meta=[
+        {"model": "gpt-4o-mini", "usage": {"prompt_tokens": 100, "completion_tokens": 20}},
+        {"usage": {"prompt_tokens": 100, "completion_tokens": 20}},
+        {"model": "gpt-4o-mini", "usage": {}},
+    ])
+    assert out["replies"] == ["a", "b", "c"] and len(out["saef"]) == 1
+    d = direct(model="gpt-4o-mini", region="eu-west-1", input_tokens=100, output_tokens=20)
+    assert t.totals()["kg_co2e"] == d.kg_co2e
+    assert len(log.read_text().splitlines()) == 1
+    t.run(replies=[ChatMessage.from_assistant("no meta")])
+    t.run(replies=["x"])
+    assert t.totals()["calls"] == 1
+    t.reset()
+    assert t.totals()["calls"] == 0
+
+
+def test_haystack_in_pipeline():
+    pytest.importorskip("haystack")
+    from typing import List
+
+    from haystack import Pipeline, component
+    from haystack.dataclasses import ChatMessage
+
+    from saef.integrations.haystack import SaefTracker
+
+    @component
+    class FakeChatGenerator:
+        @component.output_types(replies=List[ChatMessage])
+        def run(self, prompt: str):
+            return {"replies": [ChatMessage.from_assistant("hi", meta={
+                "model": "gpt-4o", "usage": {"prompt_tokens": 50, "completion_tokens": 10, "total_tokens": 60}})]}
+
+    pipe = Pipeline()
+    pipe.add_component("llm", FakeChatGenerator())
+    pipe.add_component("saef", SaefTracker(region="eu-west-1"))
+    pipe.connect("llm.replies", "saef.replies")
+    res = pipe.run({"llm": {"prompt": "Hello"}})
+    d = direct(model="gpt-4o", region="eu-west-1", input_tokens=50, output_tokens=10)
+    assert res["saef"]["saef"][0]["kg_co2e"] == d.kg_co2e
+    assert pipe.get_component("saef").totals()["calls"] == 1

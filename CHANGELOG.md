@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.0 (unreleased)
+
+- Added `saef.integrations.llamaindex.SaefEventHandler`, a LlamaIndex instrumentation event handler. It records one estimate per finished chat or completion call from the provider's raw response, exposes `totals()` and `reset()`, and `register()` adds it to the LlamaIndex root dispatcher. New optional extra `llamaindex`.
+- Added `saef.integrations.haystack.SaefTracker`, a Haystack 2.x pass-through component to place after a Generator or ChatGenerator. It reads `model` and `usage` from reply metadata, outputs the replies and a `saef` list of estimates, and keeps running totals. New optional extra `haystack`.
+- Dataset unchanged, still v3.1.0.
+
 ## 3.3.2 (2026-11-18)
 
 - The method paper is published: Sustainable Production and Consumption 70 (2026) 320-347, doi 10.1016/j.spc.2026.11.003. `saef.citation()` now returns an `@article` entry with the DOI, and the MCP server cites the journal version.

@@ -16,7 +16,7 @@ AI that runs on hardware you control can be metered, with a power meter or with 
 | Your AI use | Fits | What you get |
 |---|---|---|
 | Training or inference on your own GPUs | CodeCarbon, Green Algorithms | Estimated energy and emissions of your own hardware |
-| API calls made from your code | `saef` (this package, LiteLLM and LangChain `SaefMiddleware` integrations) or EcoLogits | Per-call estimates |
+| API calls made from your code | `saef` (this package, LiteLLM, LangChain, LlamaIndex and Haystack integrations) or EcoLogits | Per-call estimates |
 | ChatGPT, Copilot or Claude seats across a company | SAEF factors applied to seats x messages, or the free [SOMA AI calculator](https://somaai.earth/ai-footprint/calculator) (also as a [Hugging Face Space](https://huggingface.co/spaces/GuillermoLlopis/saef-ai-footprint-estimator)) | An organisation-wide estimate for Scope 3 category 1 |
 | Cloud infrastructure you rent | Your cloud provider's carbon dashboard | Emissions of your cloud account |
 
@@ -164,6 +164,77 @@ print(out["messages"][-1].response_metadata["saef"]["kg_co2e"])
 2.894e-05 kg CO2e, 4.433e-05 high case
 2.894105237117252e-05
 ```
+
+LlamaIndex, installed with `pip install "saef[llamaindex]"`. `SaefEventHandler` listens to LlamaIndex's instrumentation events and records one estimate per finished chat or completion call, reading token usage from the provider's raw response. The model name comes from the raw response, then from the call's start event. Streaming calls count only if the last chunk carries usage. This example uses a fake LLM so it runs offline. With a real LLM you register the handler once and call it as usual.
+
+```python
+from llama_index.core.base.llms.types import ChatMessage, ChatResponse, LLMMetadata
+from llama_index.core.llms import CustomLLM
+from llama_index.core.llms.callbacks import llm_chat_callback
+from saef.integrations.llamaindex import SaefEventHandler
+
+
+class FakeLLM(CustomLLM):
+    @property
+    def metadata(self):
+        return LLMMetadata(model_name="gpt-4o")
+
+    @llm_chat_callback()
+    def chat(self, messages, **kwargs):
+        raw = {"model": "gpt-4o", "usage": {"prompt_tokens": 1200, "completion_tokens": 300, "prompt_tokens_details": {"cached_tokens": 800}}}
+        return ChatResponse(message=ChatMessage(role="assistant", content="Hi there"), raw=raw)
+
+    def complete(self, prompt, formatted=False, **kwargs): ...
+    def stream_complete(self, prompt, formatted=False, **kwargs): ...
+
+
+handler = SaefEventHandler(region="eu-west-1").register()
+FakeLLM().chat([ChatMessage(role="user", content="Hello")])
+t = handler.totals()
+print(t["calls"], t["input_tokens"], t["cached_input_tokens"], t["output_tokens"])
+print(f"{t['kg_co2e']:.3e} kg CO2e, {t['kg_co2e_high_case']:.3e} high case")
+```
+
+```text
+1 400 800 300
+2.894e-05 kg CO2e, 4.433e-05 high case
+```
+
+Haystack 2.x, installed with `pip install "saef[haystack]"`. `SaefTracker` is a pass-through component. Connect `replies` from a ChatGenerator, which carries the model and usage in each reply's `meta`. For a text Generator such as `OpenAIGenerator`, also connect its `meta` output to `meta`. It outputs the replies unchanged plus `saef`, one estimate dict per reply with a model name and token usage, and keeps running totals. This example uses a fake generator so it runs offline. With a real one you add, for example, `OpenAIChatGenerator` in its place.
+
+```python
+from typing import List
+from haystack import Pipeline, component
+from haystack.dataclasses import ChatMessage
+from saef.integrations.haystack import SaefTracker
+
+
+@component
+class FakeChatGenerator:
+    @component.output_types(replies=List[ChatMessage])
+    def run(self, prompt: str):
+        meta = {"model": "gpt-4o", "usage": {"prompt_tokens": 1200, "completion_tokens": 300, "prompt_tokens_details": {"cached_tokens": 800}}}
+        return {"replies": [ChatMessage.from_assistant("Hi there", meta=meta)]}
+
+
+pipe = Pipeline()
+pipe.add_component("llm", FakeChatGenerator())
+pipe.add_component("saef", SaefTracker(region="eu-west-1"))
+pipe.connect("llm.replies", "saef.replies")
+result = pipe.run({"llm": {"prompt": "Hello"}})
+print(result["saef"]["saef"][0]["kg_co2e"])
+t = pipe.get_component("saef").totals()
+print(t["calls"], t["input_tokens"], t["cached_input_tokens"], t["output_tokens"])
+print(f"{t['kg_co2e']:.3e} kg CO2e, {t['kg_co2e_high_case']:.3e} high case")
+```
+
+```text
+2.894105237117252e-05
+1 400 800 300
+2.894e-05 kg CO2e, 4.433e-05 high case
+```
+
+All figures are estimates from token counts, not measurements.
 
 Response objects, with no extra install and no SDK import. `estimate_from_response` reads OpenAI Chat Completions, OpenAI Responses and Anthropic Messages objects, or the same shapes as dicts. Cache reads get the cache credit and cache writes count as ordinary input.
 
