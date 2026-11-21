@@ -74,6 +74,94 @@ def test_tracker_totals_log_and_fallbacks(tmp_path):
     assert t.totals()["calls"] == 0
 
 
+def test_tracker_cost_and_intensity():
+    t = Tracker(region="eu-west-1")
+    a = t.record("gpt-4o", 100, 50, cost=0.002)
+    b = t.record("gpt-4o", 100, 50)
+    assert a["cost"] == 0.002 and a["cost_currency"] == "USD"
+    assert "cost" not in b and "cost_currency" not in b
+    tot = t.totals()
+    assert tot["cost"] == pytest.approx(0.002) and tot["calls_with_cost"] == 1
+    assert tot["g_co2e_per_usd"] == pytest.approx(a["kg_co2e"] * 1000 / 0.002)
+
+
+def test_tracker_without_cost_has_no_cost_keys():
+    t = Tracker(region="eu-west-1")
+    t.record("gpt-4o", 100, 50)
+    tot = t.totals()
+    assert "cost" not in tot and "g_co2e_per_usd" not in tot
+
+
+def test_tracker_zero_cost_no_division_error():
+    t = Tracker(region="eu-west-1")
+    r = t.record("gpt-4o", 100, 50, cost=0.0)
+    assert r["cost"] == 0.0
+    tot = t.totals()
+    assert tot["cost"] == 0.0 and tot["g_co2e_per_usd"] is None
+
+
+def test_tracker_ignores_invalid_cost_and_mixed_currency():
+    t = Tracker(region="eu-west-1")
+    for bad in (-1, "0.1", True, float("nan")):
+        assert "cost" not in t.record("gpt-4o", 10, 5, cost=bad)
+    t.record("gpt-4o", 10, 5, cost=1.0)
+    t.record("gpt-4o", 10, 5, cost=1.0, cost_currency="EUR")
+    tot = t.totals()
+    assert "cost" not in tot and tot["cost_by_currency"] == {"USD": 1.0, "EUR": 1.0}
+
+
+def test_litellm_logger_cost():
+    pytest.importorskip("litellm")
+    from saef.integrations.litellm import SaefLogger
+
+    lg = SaefLogger(region="eu-west-1")
+    usage = NS(prompt_tokens=100, completion_tokens=10)
+    r1 = NS(model="gpt-4o", usage=usage, _hidden_params={})
+    lg.log_success_event({"model": "gpt-4o", "response_cost": 0.004}, r1, None, None)
+    assert r1._hidden_params["saef"]["cost"] == 0.004
+    r2 = NS(model="gpt-4o", usage=usage, _hidden_params={})
+    kw = {"model": "gpt-4o", "standard_logging_object": {"response_cost": 0.006}}
+    lg.log_success_event(kw, r2, None, None)
+    assert r2._hidden_params["saef"]["cost_currency"] == "USD"
+    tot = lg.totals()
+    assert tot["cost"] == pytest.approx(0.01) and tot["calls_with_cost"] == 2
+    assert tot["g_co2e_per_usd"] == pytest.approx(tot["kg_co2e"] * 1000 / 0.01)
+
+
+def test_litellm_logger_no_cost_and_zero_cost():
+    pytest.importorskip("litellm")
+    from saef.integrations.litellm import SaefLogger
+
+    lg = SaefLogger(region="eu-west-1")
+    usage = NS(prompt_tokens=100, completion_tokens=10)
+    r1 = NS(model="gpt-4o", usage=usage, _hidden_params={})
+    lg.log_success_event({"model": "gpt-4o", "response_cost": None}, r1, None, None)
+    assert "cost" not in r1._hidden_params["saef"] and "cost" not in lg.totals()
+    r2 = NS(model="gpt-4o", usage=usage, _hidden_params={})
+    lg.log_success_event({"model": "gpt-4o", "response_cost": 0.0}, r2, None, None)
+    assert r2._hidden_params["saef"]["cost"] == 0.0
+    assert lg.totals()["g_co2e_per_usd"] is None
+
+
+def test_summarize():
+    t = Tracker(region="eu-west-1")
+    recs = [t.record("gpt-4o", 100, 50, cost=0.002), t.record("gpt-4o", 100, 50, cost=0.002), t.record("gpt-4o", 100, 50)]
+    s = saef.summarize(recs)
+    assert s["calls"] == 3 and s["kg_co2e"] == pytest.approx(sum(r["kg_co2e"] for r in recs))
+    assert s["cost"] == pytest.approx(0.004) and s["calls_with_cost"] == 2
+    assert s["g_co2e_per_usd"] == pytest.approx(2 * recs[0]["kg_co2e"] * 1000 / 0.004)
+    assert "kwh" not in s
+
+
+def test_summarize_without_cost_zero_cost_and_estimates():
+    e = saef.estimate(model="gpt-4o", region="eu-west-1", input_tokens=100, output_tokens=50)
+    s = saef.summarize([e, e.to_dict()])
+    assert s["calls"] == 2 and "cost" not in s and "g_co2e_per_usd" not in s
+    z = saef.summarize([{"kg_co2e": 1e-3, "cost": 0.0, "kwh": 0.5}])
+    assert z["cost"] == 0.0 and z["g_co2e_per_usd"] is None and z["kwh"] == 0.5
+    assert saef.summarize([])["calls"] == 0
+
+
 def test_litellm_logger(tmp_path):
     pytest.importorskip("litellm")
     from saef.integrations.litellm import SaefLogger
@@ -135,6 +223,7 @@ def test_litellm_real_mock_completion():
         litellm.callbacks = old
     assert lg.totals()["calls"] == 1
     assert r._hidden_params["saef"]["region_id"] == "eu-west-1"
+    assert lg.totals()["cost"] > 0 and lg.totals()["g_co2e_per_usd"] > 0
 
 
 def _langchain_result(**kw):

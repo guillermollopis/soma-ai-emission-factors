@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.5.0 (2026-11-21)
+
+- Cost beside carbon. When the framework already reports the price of a call, saef records it next to the estimate and never prices tokens itself. `saef.integrations.litellm.SaefLogger` reads LiteLLM's `response_cost` (from the callback kwargs, then from the standard logging object) and adds `cost` and `cost_currency` ("USD") to the per-call record, the `response._hidden_params["saef"]` dict and the `log_path` lines. `totals()` adds `cost`, `cost_currency`, `calls_with_cost` and `g_co2e_per_usd` (grams CO2e per USD, over the calls that have a cost; None when total cost is zero). Calls without a reported cost are unchanged.
+- `Tracker.record()` takes optional `cost` and `cost_currency`.
+- Added `saef.summarize(records)`, totals over Estimate objects or the per-call dicts, with the same cost fields.
+- Dataset unchanged, still v3.1.0.
+
 ## 3.4.0 (2026-11-20)
 
 - `saef[mcp]` now pins `mcp<1.30`: mcp 1.30 with the separate `mcp-types` package fails on `import mcp`, which broke fresh installs of the MCP server.

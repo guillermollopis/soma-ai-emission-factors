@@ -258,6 +258,27 @@ Every figure is an estimate. Models the dataset treats as out of scope, such as 
 
 Example notebooks: [`examples/quickstart.ipynb`](examples/quickstart.ipynb), and a runnable copy on Kaggle, [Estimate the carbon footprint of your LLM API calls](https://www.kaggle.com/code/guillermollopis/estimate-the-carbon-footprint-of-your-llm-api-call).
 
+## Cost and carbon side by side
+
+Cost and carbon side by side. If your team optimises AI cost as well as carbon, saef can put both on the same record. saef does not price tokens and has no price table. It takes the cost the framework already reports. With LiteLLM that is `response_cost`, in USD, and the logger stores it as `cost` and `cost_currency` next to the estimate. Calls where LiteLLM reports no cost simply have no cost fields.
+
+```python
+import time
+import litellm
+from saef.integrations.litellm import SaefLogger
+
+logger = SaefLogger(region="eu-west-1")
+litellm.callbacks = [logger]
+resp = litellm.completion(model="gpt-4o-mini", messages=[{"role": "user", "content": "Hello"}], mock_response="Hi there")
+time.sleep(1)
+rec = resp._hidden_params["saef"]
+print(rec["kg_co2e"], rec["cost"], rec["cost_currency"])
+t = logger.totals()
+print(f"{t['cost']:.6f} {t['cost_currency']}, {t['g_co2e_per_usd']:.4f} g CO2e per USD")
+```
+
+`g_co2e_per_usd` is the central estimate in grams divided by the cost, over the calls that have a cost, and is `None` when the total cost is zero. To total records you logged or stored yourself, use `saef.summarize(records)`, which accepts the per-call dicts or `Estimate` objects and returns the same cost fields.
+
 ## MCP server
 
 SAEF ships an MCP server so an AI agent can estimate the carbon, energy and water of AI usage on request. It runs locally over stdio and needs the optional `mcp` extra. The core package stays dependency-free.

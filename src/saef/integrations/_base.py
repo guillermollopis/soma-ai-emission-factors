@@ -7,6 +7,10 @@ from .. import SaefError, estimate
 DEFAULT_REGION = "global-average"
 
 
+def valid_cost(cost):
+    return isinstance(cost, (int, float)) and not isinstance(cost, bool) and cost == cost and cost >= 0
+
+
 def default_region():
     return os.environ.get("SAEF_REGION") or DEFAULT_REGION
 
@@ -28,6 +32,9 @@ class Tracker:
             self._input = self._cached = self._output = 0
             self._kg = self._kg_high = self._water = 0.0
             self._water_missing = 0
+            self._cost = {}
+            self._cost_calls = 0
+            self._kg_costed = 0.0
             self._by_model = {}
 
     def _estimate(self, model, input_tokens, output_tokens, cached_input_tokens, region, provider):
@@ -42,8 +49,12 @@ class Tracker:
                 return estimate(region=self.region, **kw)
             raise
 
-    def record(self, model, input_tokens, output_tokens, cached_input_tokens=0, region=None, provider=None, extra=None):
+    def record(self, model, input_tokens, output_tokens, cached_input_tokens=0, region=None, provider=None, extra=None,
+               cost=None, cost_currency="USD"):
         """Estimate one call, add it to the totals and return a plain dict, or None if the model is out of scope.
+
+        cost is the price of the call as reported by the framework, never computed here. It is stored next to the
+        estimate only when it is a number >= 0.
 
         A per-call region that SAEF does not know falls back to the configured region."""
         try:
@@ -65,6 +76,10 @@ class Tracker:
             "dataset_version": e.version,
             "note": "estimate",
         }
+        has_cost = valid_cost(cost)
+        if has_cost:
+            out["cost"] = float(cost)
+            out["cost_currency"] = cost_currency
         with self._lock:
             self._calls += 1
             self._input += input_tokens
@@ -76,6 +91,10 @@ class Tracker:
                 self._water_missing += 1
             else:
                 self._water += e.water_ml
+            if has_cost:
+                self._cost[cost_currency] = self._cost.get(cost_currency, 0.0) + cost
+                self._cost_calls += 1
+                self._kg_costed += e.kg_co2e
             m = self._by_model.setdefault(model, {"calls": 0, "kg_co2e": 0.0})
             m["calls"] += 1
             m["kg_co2e"] += e.kg_co2e
@@ -86,7 +105,7 @@ class Tracker:
 
     def totals(self):
         with self._lock:
-            return {
+            totals = {
                 "calls": self._calls,
                 "skipped_calls": self._skipped,
                 "input_tokens": self._input,
@@ -98,3 +117,13 @@ class Tracker:
                 "calls_without_water_factor": self._water_missing,
                 "by_model": {k: dict(v) for k, v in self._by_model.items()},
             }
+            if self._cost_calls:
+                totals["calls_with_cost"] = self._cost_calls
+                if len(self._cost) == 1:
+                    (currency, total), = self._cost.items()
+                    totals["cost"] = total
+                    totals["cost_currency"] = currency
+                    totals["g_co2e_per_usd"] = self._kg_costed * 1000 / total if currency == "USD" and total > 0 else None
+                else:
+                    totals["cost_by_currency"] = dict(self._cost)
+            return totals

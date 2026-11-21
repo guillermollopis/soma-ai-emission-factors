@@ -24,7 +24,11 @@ REGION_PARAMS = {
 class SaefLogger(CustomLogger):
     """region defaults to env SAEF_REGION, then 'global-average'. For Bedrock, SageMaker and Vertex AI the call's own
     region is used when LiteLLM exposes it. region_map, for example {"azure": "swedencentral"}, overrides the
-    default per LiteLLM provider. The estimate is attached to response._hidden_params["saef"]."""
+    default per LiteLLM provider. The estimate is attached to response._hidden_params["saef"].
+
+    When LiteLLM reports the call's price (kwargs["response_cost"], or response_cost in the standard logging object)
+    it is stored next to the estimate as cost and cost_currency ("USD"), and totals() adds cost and g_co2e_per_usd.
+    SAEF never prices tokens itself."""
 
     def __init__(self, region=None, region_map=None, log_path=None, **kwargs):
         super().__init__(**kwargs)
@@ -58,8 +62,11 @@ class SaefLogger(CustomLogger):
         if not model:
             return
         region, provider = self._region_for(kwargs)
+        cost = kwargs.get("response_cost")
+        if cost is None:
+            cost = (kwargs.get("standard_logging_object") or {}).get("response_cost")
         res = self._tracker.record(
-            model, inp, out, cached, region=region,
+            model, inp, out, cached, region=region, cost=cost,
             extra={"call_id": kwargs.get("litellm_call_id"), "provider": provider},
         )
         if res is not None:
