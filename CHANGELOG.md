@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.0 (2026-11-23)
+
+- Bundles SAEF dataset v3.2.0 (version DOI 10.5281/zenodo.24460344). The model class mapping grows from 187 to 220 patterns. The 33 new patterns cover 17 more providers, among them IBM Granite, ByteDance Seed, StepFun, Upstage Solar, Sarvam, Liquid AI, Inception Mercury and Sakana, so these ids now resolve to a named row instead of the class C default. No existing row and no factor changed.
+
 ## 3.5.0 (2026-11-21)
 
 - Cost beside carbon. When the framework already reports the price of a call, saef records it next to the estimate and never prices tokens itself. `saef.integrations.litellm.SaefLogger` reads LiteLLM's `response_cost` (from the callback kwargs, then from the standard logging object) and adds `cost` and `cost_currency` ("USD") to the per-call record, the `response._hidden_params["saef"]` dict and the `log_path` lines. `totals()` adds `cost`, `cost_currency`, `calls_with_cost` and `g_co2e_per_usd` (grams CO2e per USD, over the calls that have a cost; None when total cost is zero). Calls without a reported cost are unchanged.

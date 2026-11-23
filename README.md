@@ -7,7 +7,7 @@
 
 SOMA AI Emission Factors (SAEF) is an open, versioned dataset of estimated carbon and water factors for AI inference, by model class and by region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions. Every factor traces to a file and a source, and the calculator returns the file, line and column behind each number. Published by [SOMA AI](https://somaai.earth), Barcelona, under CC BY 4.0. The method is peer reviewed and published in Sustainable Production and Consumption 70 (2026) 320-347, https://doi.org/10.1016/j.spc.2026.11.003 (free preprint arXiv 2606.10660).
 
-This repository holds the v3.1.0 tables (lifecycle boundary, dataset date 2026-10-02, version DOI [10.5281/zenodo.24160409](https://doi.org/10.5281/zenodo.24160409); v3.1.0 is a corrective release of v3.0.0 that maps Azure canadaeast and Google Cloud northamerica-northeast1 to the Quebec grid and replaces the Central African Republic's rounded-to-zero grid row, see the release notes) and the source of the `saef` Python package. The complete deposit, with the reference calculator, the generator scripts and the supplementary documents, is on [Zenodo](https://doi.org/10.5281/zenodo.20443585).
+This repository holds the v3.2.0 tables (lifecycle boundary, dataset date 2026-10-02, version DOI [10.5281/zenodo.24460344](https://doi.org/10.5281/zenodo.24460344); v3.2.0 adds 33 model-mapping rows to v3.1.0 and changes no factor, see the release notes) and the source of the `saef` Python package. The complete deposit, with the reference calculator, the generator scripts and the supplementary documents, is on [Zenodo](https://doi.org/10.5281/zenodo.20443585).
 
 ## How can I measure the environmental impact of the AI I use?
 
@@ -42,7 +42,7 @@ No. CodeCarbon reads the power of hardware you run, and its own README points us
 
 ### Where does purchased AI go in a GHG inventory?
 
-Under Scope 3 category 1 (purchased goods and services). Label the figure as an estimate, show a low-to-high band, and name the factor version used, for example SAEF v3.1.0.
+Under Scope 3 category 1 (purchased goods and services). Label the figure as an estimate, show a low-to-high band, and name the factor version used, for example SAEF v3.2.0.
 
 ### Can the energy use of a provider's AI be measured directly?
 
@@ -335,7 +335,7 @@ Example prompt, "Using SAEF, what is the carbon and water footprint of 2 million
 | `grid_intensity_all.csv` | 240 | Grid carbon intensity (kg CO2e per kWh) for 210 countries and economies, 27 US eGRID subregions, EU-27, the world average and one subnational row, with the class factors at each grid |
 | `factors_v3_lifecycle.csv` | 102 | Class factors by class, GPU (H100 central, B200 sensitivity) and printed region, with the energy and the four terms |
 | `model_factors.csv` | 32 | Factors for the 18 measured open-weight models on H100 and B200, from the ML.ENERGY Leaderboard v3 |
-| `model_class_mapping.csv` | 187 | Identifier patterns, including AWS Bedrock, Azure and Vertex AI spellings, mapped to class A, B or C, plus the class C default for unmapped names |
+| `model_class_mapping.csv` | 220 | Identifier patterns, including AWS Bedrock, Azure and Vertex AI spellings, mapped to class A, B or C, plus the class C default for unmapped names |
 | `region_water_factors.csv` | 17 | On-site and off-site water factors under both hydropower conventions, with AWARE 2.0 scarcity weighting |
 | `region_grid_crosswalk.csv` | 17 | Printed region ids mapped to grids |
 | `token_basis_constants.csv` | 7 | Weights that convert billed tokens to effective tokens |
@@ -370,7 +370,7 @@ The numbers are estimates, not measurements.
   title        = {{SOMA AI Emission Factors (SAEF)}},
   year         = {2026},
   publisher    = {Zenodo},
-  version      = {v3.1.0},
+  version      = {v3.2.0},
   doi          = {10.5281/zenodo.20443585},
   url          = {https://doi.org/10.5281/zenodo.20443585}
 }
@@ -398,7 +398,7 @@ Pin a dataset in an inventory by the version DOI. The concept DOI always resolve
 - Hugging Face Space, try the estimator in the browser: https://huggingface.co/spaces/GuillermoLlopis/saef-ai-footprint-estimator
 
 - Zenodo (concept DOI, always latest version): https://doi.org/10.5281/zenodo.20443585
-- Zenodo v3.1.0 record: https://zenodo.org/records/24160409
+- Zenodo v3.2.0 record: https://zenodo.org/records/24460344
 - Zenodo v3.0.0 record: https://zenodo.org/records/23371447
 - Website: https://somaai.earth/ai-footprint/factors
 - Paper (Sustainable Production and Consumption, 2026): https://doi.org/10.1016/j.spc.2026.11.003

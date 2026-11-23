@@ -39,7 +39,7 @@ print(r.kg_co2e, r.kg_co2e_high_case)             # central and conservative hig
 print(r.water_ml)                                 # mL, or None where the region has no water factor
 for s in r.provenance[:3]:
     print(s["file"], s["line"], s["column"])      # the file, line and column behind each number
-print(len(saef.regions()), saef.__version__, saef.DATASET_VERSION)  # 143 cloud regions, 3.5.0, 3.1.0
+print(len(saef.regions()), saef.__version__, saef.DATASET_VERSION)  # 143 cloud regions, 3.6.0, 3.2.0
 print(saef.citation())
 ```
 
@@ -298,7 +298,7 @@ The factors follow the v3 lifecycle boundary. An estimate has four terms: electr
 
 - Effective tokens are output tokens plus weighted input tokens, divided by a reference-mix normaliser. Pass `tokens` for a billed total, which applies the default input share of 85% and no cache credit. Pass `output_tokens`, `input_tokens` and `cached_input_tokens` when your billing export gives the split.
 - Never multiply a billed token count by a per-effective-token footprint yourself. Use `estimate`, or the `kg_co2e_per_1m_billed_tokens` value from `factor`.
-- A model maps to class A, B or C through 187 identifier patterns, including AWS Bedrock, Azure and Vertex AI spellings. Closed models are class proxies by pricing tier, and the result says so in `warnings`. An unmapped identifier is assigned the conservative class C and flagged. Embeddings, image, audio and video models are out of scope and raise an error.
+- A model maps to class A, B or C through 220 identifier patterns, including AWS Bedrock, Azure and Vertex AI spellings. Closed models are class proxies by pricing tier, and the result says so in `warnings`. An unmapped identifier is assigned the conservative class C and flagged. Embeddings, image, audio and video models are out of scope and raise an error.
 - `region` can be a cloud region id (143 AWS, Azure and Google Cloud regions), an ISO-3 country code (210 countries and economies), a US eGRID subregion, `eu-27`, or `None` for the global average. A region that matches nothing raises `saef.SaefError` with suggestions.
 - Water covers 17 regions, under two hydropower conventions (`water_ml` and `water_ml_excl_hydro`). Elsewhere `water_ml` is `None`, by design.
 - `kg_co2e_high_case` is a conservative bound. The development line is reported separately and is never added to `kg_co2e`.
@@ -307,7 +307,7 @@ The factors follow the v3 lifecycle boundary. An estimate has four terms: electr
 
 These figures are modelled estimates built from published benchmarks, grid averages and lifecycle studies. They are not measurements of any provider's infrastructure. The tables carry six significant figures as arithmetic, but the inputs support about two. Report the central value with the high case, and read the methodology before quoting them.
 
-This package bundles the SAEF v3.1.0 tables (dataset date 2026-10-02, a corrective release of v3.0.0) and covers the H100 central case. Reserved accelerator-hour factors, the B200 sensitivity and the Tier 2b seat-based estimates in the full deposit are not exposed by this API.
+This package bundles the SAEF v3.2.0 tables (dataset date 2026-10-02, which adds 33 model-mapping rows to v3.1.0) and covers the H100 central case. Reserved accelerator-hour factors, the B200 sensitivity and the Tier 2b seat-based estimates in the full deposit are not exposed by this API.
 
 ## Licence
 

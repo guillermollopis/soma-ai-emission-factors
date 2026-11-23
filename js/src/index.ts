@@ -21,7 +21,7 @@ const BIBTEX = `@misc{llopis2026somafactors,
   title        = {{SOMA AI Emission Factors (SAEF)}},
   year         = {2026},
   publisher    = {Zenodo},
-  version      = {v3.1.0},
+  version      = {v3.2.0},
   doi          = {10.5281/zenodo.20443585},
   url          = {https://doi.org/10.5281/zenodo.20443585}
 }

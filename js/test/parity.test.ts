@@ -53,7 +53,7 @@ describe("parity with the Python package", () => {
         expect(e.classBasis, label).toBe(x.class_basis);
         expect(e.warnings, label).toEqual(x.warnings);
       }
-      expect(e.factorVersion).toBe("3.1.0");
+      expect(e.factorVersion).toBe("3.2.0");
       ok++;
     }
     expect(ok).toBeGreaterThan(1000);

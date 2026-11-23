@@ -11,7 +11,7 @@ from ._core import (
     regions,
 )
 
-__version__ = "3.5.0"
+__version__ = "3.6.0"
 
 
 def _get(rec, key):
