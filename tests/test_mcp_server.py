@@ -78,7 +78,7 @@ def test_negative_tokens_rejected():
 
 def test_about_resource_and_registration():
     text = m.about()
-    for s in ("10.5281/zenodo.20443585", "2606.10660", "https://somaai.earth/ai-footprint", "CC BY 4.0"):
+    for s in ("10.5281/zenodo.20443585", "2606.10660", "https://somaai.earth/ai-footprint", "Non-Commercial", "https://somaai.earth/licensing"):
         assert s in text
 
 

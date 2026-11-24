@@ -1,8 +1,8 @@
 # saef
 
-JavaScript and TypeScript access to SAEF, the SOMA AI Emission Factors. SAEF is an open, versioned dataset of estimated carbon and water factors for AI inference, by model class and region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. This package bundles the factor tables and gives you a small API on top of them. It is a port of the [Python package](https://pypi.org/project/saef/) and gives the same numbers. It has no runtime dependencies.
+JavaScript and TypeScript access to SAEF, the SOMA AI Emission Factors. SAEF is a versioned dataset of estimated carbon and water factors for AI inference, by model class and region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. This package bundles the factor tables and gives you a small API on top of them. It is a port of the [Python package](https://pypi.org/project/saef/) and gives the same numbers. It has no runtime dependencies.
 
-Use it to estimate the carbon (kg CO2e), energy (kWh) and water (L) of OpenAI, Anthropic and other LLM API calls from the token usage each response already reports, with one function call on a response object or a Vercel AI SDK middleware. The method is peer reviewed, published in Sustainable Production and Consumption 70 (2026) 320-347 (https://doi.org/10.1016/j.spc.2026.11.003).
+Use it to estimate the carbon (kg CO2e), energy (kWh) and water (L) of OpenAI, Anthropic and other LLM API calls from the token usage each response already reports, with one function call on a response object or a Vercel AI SDK middleware. The method is published in Sustainable Production and Consumption 70 (2026) 320-347 (https://doi.org/10.1016/j.spc.2026.11.003).
 
 ## Install
 
@@ -23,7 +23,7 @@ const e = estimate({ model: "gpt-4o-mini", inputTokens: 1200, outputTokens: 300,
 console.log(e.kgCo2e, e.kgCo2eHighCase); // central and conservative high case, kg CO2e
 console.log(e.kwh);                      // facility energy, kWh
 console.log(e.litres);                   // water in litres, or null where the region has no water factor
-console.log(e.modelClass, e.region, e.factorVersion); // "A" "eu-west-1" "3.1.0"
+console.log(e.modelClass, e.region, e.factorVersion); // "A" "eu-west-1" "3.3.0"
 
 estimate({ model: "gpt-4o", tokens: 1_000_000, region: "eu-west-1" }); // a billed total with no split
 console.log(factor("B", "eu-west-1").kgCo2ePer1mBilledTokens);
@@ -108,7 +108,7 @@ The factors follow the v3 lifecycle boundary. An estimate has four terms: electr
 
 These figures are modelled estimates built from published benchmarks, grid averages and lifecycle studies. They are not measurements of any provider's infrastructure. The tables carry six significant figures as arithmetic, but the inputs support about two. Report the central value with the high case, and read the methodology before quoting them.
 
-This package bundles the SAEF v3.1.0 tables (dataset date 2026-10-02) and covers the H100 central case. Reserved accelerator-hour factors, the B200 sensitivity and the Tier 2b seat-based estimates in the full deposit are not exposed by this API.
+This package bundles the SAEF v3.3.0 tables (same values as v3.2.0, licence change only; dataset date 2026-10-02 for the values) and covers the H100 central case. Reserved accelerator-hour factors, the B200 sensitivity and the Tier 2b seat-based estimates in the full deposit are not exposed by this API.
 
 ## EcoLogits and saef
 
@@ -120,11 +120,11 @@ The factor tables in `data/saef-data.json` are generated from the Python package
 
 ## Licence
 
-The dataset is licensed under CC BY 4.0, see `LICENSE`. The code is licensed under MIT, see `LICENSE-CODE`. Attribution for the data is required, see the citation below.
+The dataset (v3.3.0 onward) is licensed under the SOMA AI Emission Factors Data Licence 1.0 (Non-Commercial), see `LICENSE`. The code is licensed under PolyForm Noncommercial 1.0.0, see `LICENSE-CODE`. Free for personal use, academic and non-profit research, journalism, charities and government. Any use by a company or freelancer, including internal ESG/CSRD reporting, needs a commercial licence: https://somaai.earth/licensing (guillermollopis@somaai.earth). Versions up to v3.2.0 stay under CC BY 4.0 (data) and MIT (code). Attribution for the data is required, see the citation below.
 
 ## Citation
 
-Dataset (concept DOI, always the latest version): https://doi.org/10.5281/zenodo.20443585. This release (v3.1.0): https://doi.org/10.5281/zenodo.24160409
+Dataset (concept DOI, always the latest version): https://doi.org/10.5281/zenodo.20443585. Dataset values as in v3.2.0: https://doi.org/10.5281/zenodo.24460344
 
 ```bibtex
 @misc{llopis2026somafactors,

@@ -3,11 +3,11 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20443585.svg)](https://doi.org/10.5281/zenodo.20443585)
 [![Paper DOI](https://img.shields.io/badge/DOI-10.1016/j.spc.2026.11.003-blue.svg)](https://doi.org/10.1016/j.spc.2026.11.003)
 [![arXiv](https://img.shields.io/badge/arXiv-2606.10660-b31b1b.svg)](https://arxiv.org/abs/2606.10660)
-[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![License: Non-Commercial](https://img.shields.io/badge/License-Non--Commercial-lightgrey.svg)](https://somaai.earth/licensing)
 
-SOMA AI Emission Factors (SAEF) is an open, versioned dataset of estimated carbon and water factors for AI inference, by model class and by region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions. Every factor traces to a file and a source, and the calculator returns the file, line and column behind each number. Published by [SOMA AI](https://somaai.earth), Barcelona, under CC BY 4.0. The method is peer reviewed and published in Sustainable Production and Consumption 70 (2026) 320-347, https://doi.org/10.1016/j.spc.2026.11.003 (free preprint arXiv 2606.10660).
+SOMA AI Emission Factors (SAEF) is a versioned dataset of estimated carbon and water factors for AI inference, by model class and by region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions. Every factor traces to a file and a source, and the calculator returns the file, line and column behind each number. Published by [SOMA AI](https://somaai.earth), Barcelona, under a non-commercial licence, see the Licence section. The method is published in Sustainable Production and Consumption 70 (2026) 320-347, https://doi.org/10.1016/j.spc.2026.11.003 (free preprint arXiv 2606.10660).
 
-This repository holds the v3.2.0 tables (lifecycle boundary, dataset date 2026-10-02, version DOI [10.5281/zenodo.24460344](https://doi.org/10.5281/zenodo.24460344); v3.2.0 adds 33 model-mapping rows to v3.1.0 and changes no factor, see the release notes) and the source of the `saef` Python package. The complete deposit, with the reference calculator, the generator scripts and the supplementary documents, is on [Zenodo](https://doi.org/10.5281/zenodo.20443585).
+This repository holds the v3.3.0 tables (lifecycle boundary, dataset date 2026-10-02; the values are identical to v3.2.0, version DOI [10.5281/zenodo.24460344](https://doi.org/10.5281/zenodo.24460344), and v3.3.0 changes only the licence, see the release notes) and the source of the `saef` Python package. The complete deposit, with the reference calculator, the generator scripts and the supplementary documents, is on [Zenodo](https://doi.org/10.5281/zenodo.20443585).
 
 ## How can I measure the environmental impact of the AI I use?
 
@@ -42,7 +42,7 @@ No. CodeCarbon reads the power of hardware you run, and its own README points us
 
 ### Where does purchased AI go in a GHG inventory?
 
-Under Scope 3 category 1 (purchased goods and services). Label the figure as an estimate, show a low-to-high band, and name the factor version used, for example SAEF v3.2.0.
+Under Scope 3 category 1 (purchased goods and services). Label the figure as an estimate, show a low-to-high band, and name the factor version used, for example SAEF v3.3.0.
 
 ### Can the energy use of a provider's AI be measured directly?
 
@@ -370,7 +370,7 @@ The numbers are estimates, not measurements.
   title        = {{SOMA AI Emission Factors (SAEF)}},
   year         = {2026},
   publisher    = {Zenodo},
-  version      = {v3.2.0},
+  version      = {v3.3.0},
   doi          = {10.5281/zenodo.20443585},
   url          = {https://doi.org/10.5281/zenodo.20443585}
 }
@@ -421,4 +421,4 @@ Pin a dataset in an inventory by the version DOI. The concept DOI always resolve
 
 ## License
 
-The data is licensed under CC BY 4.0, see [LICENSE](LICENSE). Attribution: Llopis-Garcia, G. (2026), SOMA AI Emission Factors (SAEF), https://doi.org/10.5281/zenodo.20443585. The Python package code in `src/` is licensed under MIT, see `LICENSE-CODE`.
+The data (v3.3.0 onward) is licensed under the SOMA AI Emission Factors Data Licence 1.0 (Non-Commercial), see [LICENSE](LICENSE). The code in `src/` and `js/` is licensed under PolyForm Noncommercial 1.0.0, see [LICENSE-CODE](LICENSE-CODE). Free for personal use, academic and non-profit research, journalism, charities and government. Any use by a company or freelancer, including internal ESG/CSRD reporting, needs a commercial licence: https://somaai.earth/licensing (guillermollopis@somaai.earth). Versions up to v3.2.0 stay under CC BY 4.0 (data) and MIT (code). Attribution: Llopis-Garcia, G. (2026), SOMA AI Emission Factors (SAEF), https://doi.org/10.5281/zenodo.20443585.

@@ -5,10 +5,10 @@ build-backend = "hatchling.build"
 [project]
 name = "saef"
 dynamic = ["version"]
-description = "Estimate the carbon and water footprint of AI API calls (OpenAI, Anthropic, LiteLLM, LangChain, LlamaIndex, Haystack) with SAEF, open per-token emission factors"
+description = "Estimate the carbon and water footprint of AI API calls (OpenAI, Anthropic, LiteLLM, LangChain, LlamaIndex, Haystack) with SAEF, per-token emission factors"
 readme = "PYPI_README.md"
 requires-python = ">=3.9"
-license = "MIT AND CC-BY-4.0"
+license = "LicenseRef-SAEF-Data-NC-1.0 AND PolyForm-Noncommercial-1.0.0"
 license-files = ["LICENSE-CODE", "LICENSE"]
 authors = [{ name = "Guillermo Llopis-Garcia", email = "guillermollopis@somaai.earth" }]
 keywords = ["carbon-footprint", "ai-emissions", "llm", "scope-3", "csrd", "ghg-protocol", "emission-factors", "water-footprint", "openai", "anthropic", "litellm", "langchain", "llamaindex", "haystack", "mcp", "green-ai", "carbon-tracking", "ai-carbon-footprint", "sustainability"]
@@ -16,6 +16,7 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
+    "License :: Other/Proprietary License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",

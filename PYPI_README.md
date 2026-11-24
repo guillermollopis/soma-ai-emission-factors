@@ -39,7 +39,7 @@ print(r.kg_co2e, r.kg_co2e_high_case)             # central and conservative hig
 print(r.water_ml)                                 # mL, or None where the region has no water factor
 for s in r.provenance[:3]:
     print(s["file"], s["line"], s["column"])      # the file, line and column behind each number
-print(len(saef.regions()), saef.__version__, saef.DATASET_VERSION)  # 143 cloud regions, 3.6.0, 3.2.0
+print(len(saef.regions()), saef.__version__, saef.DATASET_VERSION)  # 143 cloud regions, 3.7.0, 3.3.0
 print(saef.citation())
 ```
 
@@ -307,11 +307,11 @@ The factors follow the v3 lifecycle boundary. An estimate has four terms: electr
 
 These figures are modelled estimates built from published benchmarks, grid averages and lifecycle studies. They are not measurements of any provider's infrastructure. The tables carry six significant figures as arithmetic, but the inputs support about two. Report the central value with the high case, and read the methodology before quoting them.
 
-This package bundles the SAEF v3.2.0 tables (dataset date 2026-10-02, which adds 33 model-mapping rows to v3.1.0) and covers the H100 central case. Reserved accelerator-hour factors, the B200 sensitivity and the Tier 2b seat-based estimates in the full deposit are not exposed by this API.
+This package bundles the SAEF v3.3.0 tables (same values as v3.2.0, licence change only; dataset date 2026-10-02 for the values) and covers the H100 central case. Reserved accelerator-hour factors, the B200 sensitivity and the Tier 2b seat-based estimates in the full deposit are not exposed by this API.
 
 ## Licence
 
-The dataset is licensed under CC BY 4.0. The Python code is licensed under MIT. Attribution for the data is required, see the citation below.
+The dataset is licensed under the SOMA AI Emission Factors Data Licence 1.0 (Non-Commercial), see `LICENSE`, from dataset v3.3.0. The Python code is licensed under PolyForm Noncommercial 1.0.0, see `LICENSE-CODE`. Free for personal use, academic and non-profit research, journalism, charities and government. Any use by a company or freelancer, including internal ESG/CSRD reporting, needs a commercial licence: https://somaai.earth/licensing (guillermollopis@somaai.earth). Versions up to v3.2.0 (package 3.6.0 and earlier) remain under CC BY 4.0 (data) and MIT (code). Attribution for the data is required, see the citation below.
 
 ## Citation
 

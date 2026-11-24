@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.7.0 (2026-11-24)
+
+- Licence change. Package code is now PolyForm Noncommercial 1.0.0 and the bundled dataset v3.3.0 is under the SOMA AI Emission Factors Data Licence 1.0 (Non-Commercial). Free for personal use, academic and non-profit research, journalism, charities and government. Any use by a company or freelancer, including internal ESG/CSRD reporting, needs a commercial licence: https://somaai.earth/licensing (guillermollopis@somaai.earth).
+- Dataset v3.3.0 has the same values as v3.2.0, only the version label and licence changed.
+- Versions up to 3.6.0 (dataset v3.2.0 and earlier) stay under CC BY 4.0 (data) and MIT (code).
+
 ## 3.6.0 (2026-11-23)
 
 - Bundles SAEF dataset v3.2.0 (version DOI 10.5281/zenodo.24460344). The model class mapping grows from 187 to 220 patterns. The 33 new patterns cover 17 more providers, among them IBM Granite, ByteDance Seed, StepFun, Upstage Solar, Sarvam, Liquid AI, Inception Mercury and Sakana, so these ids now resolve to a named row instead of the class C default. No existing row and no factor changed.

@@ -14,14 +14,14 @@ import {
 
 export { SaefError, DATASET_VERSION, DATASET_DOI, DATASET_VERSION_DOI, PAPER_DOI };
 
-export const VERSION = "3.4.0";
+export const VERSION = "3.7.0";
 
 const BIBTEX = `@misc{llopis2026somafactors,
   author       = {Llopis-Garcia, Guillermo},
   title        = {{SOMA AI Emission Factors (SAEF)}},
   year         = {2026},
   publisher    = {Zenodo},
-  version      = {v3.2.0},
+  version      = {v3.3.0},
   doi          = {10.5281/zenodo.20443585},
   url          = {https://doi.org/10.5281/zenodo.20443585}
 }

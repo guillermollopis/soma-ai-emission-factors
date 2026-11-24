@@ -3,17 +3,17 @@ message: "If you use this dataset, please cite both the dataset (below) and the 
 type: dataset
 title: "SOMA AI Emission Factors (SAEF)"
 abstract: "SOMA AI Emission Factors (SAEF) is an open, versioned dataset of estimated carbon and water factors for AI inference, per million tokens, by model class and by region, for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions."
-version: 3.2.0
-date-released: 2026-11-23
+version: 3.3.0
+date-released: 2026-11-24
 authors:
   - family-names: Llopis-Garcia
     given-names: Guillermo
     orcid: "https://orcid.org/0009-0001-9985-6516"
     affiliation: SOMA AI
-license: CC-BY-4.0
+license: LicenseRef-SAEF-Data-NC-1.0
 repository-code: "https://github.com/guillermollopis/soma-ai-emission-factors"
 url: "https://somaai.earth/ai-footprint/factors"
-doi: 10.5281/zenodo.24460344
+doi: 10.5281/zenodo.20443585
 identifiers:
   - type: doi
     value: 10.5281/zenodo.20443585

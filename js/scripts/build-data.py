@@ -35,7 +35,7 @@ for c in "abc":
         f"class_{c}_factor_kg_per_m_billed_tokens_default_mix",
     ]
 
-version = "3.2.0"
+version = "3.3.0"
 init = (src / "_core.py").read_text(encoding="utf-8")
 assert f'DATASET_VERSION = "{version}"' in init
 
