@@ -1,6 +1,6 @@
 # saef
 
-Python access to SAEF, the SOMA AI Emission Factors. SAEF is an open, versioned dataset of estimated carbon and water factors for AI inference, by model class and region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. This package bundles the CSV files and gives you a small API and command line on top of them. It has no dependencies beyond the standard library.
+Python access to SAEF, the SOMA AI Emission Factors. SAEF is a versioned dataset of estimated carbon and water factors for AI inference, by model class and region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. This package bundles the CSV files and gives you a small API and command line on top of them. It has no dependencies beyond the standard library.
 
 Use it to track the estimated carbon and water footprint of OpenAI, Anthropic and other LLM API calls from the token usage each response already reports, with a LiteLLM callback, a LangChain handler, an MCP server, or one function call on a response object. The method is peer reviewed, published in Sustainable Production and Consumption 70 (2026) 320-347 (https://doi.org/10.1016/j.spc.2026.11.003).
 

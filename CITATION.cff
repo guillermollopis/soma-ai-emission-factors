@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this dataset, please cite both the dataset (below) and the preferred-citation paper."
 type: dataset
 title: "SOMA AI Emission Factors (SAEF)"
-abstract: "SOMA AI Emission Factors (SAEF) is an open, versioned dataset of estimated carbon and water factors for AI inference, per million tokens, by model class and by region, for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions."
+abstract: "SOMA AI Emission Factors (SAEF) is a versioned dataset of estimated carbon and water factors for AI inference, per million tokens, by model class and by region, for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions."
 version: 3.3.0
 date-released: 2026-11-24
 authors:
@@ -18,6 +18,9 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.20443585
     description: "Concept DOI — represents all versions of the dataset and always resolves to the latest one"
+  - type: doi
+    value: 10.5281/zenodo.24506078
+    description: "Version DOI for v3.3.0 (2026-11-24, licence change)"
   - type: doi
     value: 10.5281/zenodo.24460344
     description: "Version DOI for v3.2.0"
