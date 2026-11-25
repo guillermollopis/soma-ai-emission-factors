@@ -27,7 +27,7 @@ UNITS = {
     "audio_seconds": ("audio_minute", 1 / 60),
 }
 ALIASES = {
-    "tokens": "input_tokens", "embedding_tokens": "input_tokens", "tokens_scored": "input_tokens",
+    "embedding_tokens": "input_tokens", "tokens_scored": "input_tokens",
     "audio_input_tokens": "input_tokens", "text_input_tokens": "input_tokens", "image_input_tokens": "input_tokens",
 }
 # Billing units that name a model type by themselves, with the class charged when the identifier does not fit the unit.
