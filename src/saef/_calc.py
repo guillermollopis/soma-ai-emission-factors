@@ -53,7 +53,17 @@ def const(name):
     return float(constants()[name]["central"])
 
 
+_CAMEL_BOUNDARY = re.compile(r"(?<=[a-z0-9])(?=[A-Z])")
+
+
 def normalise_identifier(identifier):
+    spaced = _CAMEL_BOUNDARY.sub("-", str(identifier).strip())
+    if spaced != str(identifier).strip():
+        return list(dict.fromkeys(_normalise_lower(str(identifier)) + _normalise_lower(spaced)))
+    return _normalise_lower(str(identifier))
+
+
+def _normalise_lower(identifier):
     s = str(identifier).strip().lower()
     cands = [s]
     body = s
@@ -93,7 +103,7 @@ def _patterns():
             alt = alt.strip().lower()
             if alt:
                 rx = re.compile("".join(".*" if p == "*" else re.escape(p) for p in re.split(r"(\*)", alt)))
-                out.append((_rank(alt), rx, r))
+                out.append(((r["model_class"] == "out-of-scope", _rank(alt)), rx, r))
     out.sort(key=lambda x: x[0], reverse=True)
     return out
 

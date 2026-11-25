@@ -356,6 +356,8 @@ T_eff   = (T_out + 0.30 x T_in_uncached + 0.05 x T_in_cached) / 1.339
 Never multiply a billed token count by an inference footprint. At the default mix that overstates the result by about 3.1 times. Where only a billed total is known, use the default-mix factor per billed token, which already carries the conversion (0.302465 effective tokens per billed token at an 85% input share with no cache credit).
 
 - An unmapped identifier is assigned class C and flagged. Embeddings, image, audio, video and fine-tuning jobs are out of scope.
+- Out-of-scope rows (embedding, image, audio, video, moderation, rerank) win over any text-model row that also matches, so a name like `gpt-4o-mini-transcribe` never receives a class. Bedrock camelCase names such as `TitanEmbeddingV2-Text` are split at case boundaries before matching.
+- Token basis. Cache-write tokens (Anthropic `cache_creation_input_tokens`, Bedrock `cacheWriteInputTokens`) count as uncached input, weight W_in. Reasoning and thinking tokens count as output. OpenAI, Anthropic and Bedrock already include them in billed output, so add nothing. Gemini reports `thoughtsTokenCount` separately from `candidatesTokenCount`, so add it to output.
 - Unknown or global regions use the global-average grid. Water has no fallback, and covers 17 regions only.
 - Each result carries a conservative high case. A development line is reported separately and never added to a total.
 - Six significant figures are arithmetic, not evidence. The inputs support about two. Report the central value with the high case.

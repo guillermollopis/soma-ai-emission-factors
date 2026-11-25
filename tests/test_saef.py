@@ -6,6 +6,7 @@ import sys
 import pytest
 
 import saef
+from saef._calc import map_model
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -153,3 +154,71 @@ def test_parity_with_official_calculator():
                 assert e.water_ml is None
             else:
                 assert e.water_ml == pytest.approx(w["litres_total_reig"] * 1000, rel=1e-9)
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        "gpt-image-2",
+        "gpt-image-2-tpp-rgba",
+        "gpt-image-1.5-2025-12-16",
+        "gpt-image-2.5-flare",
+        "gpt-image-2.5-sunburst",
+        "gemini-3.1-flash-lite-image",
+        "gemini-2.5-flash-preview-tts",
+        "gemini-2.5-flash-live",
+        "gemini-2.5-flash-native-audio",
+        "advanced-voice-4o",
+        "advanced-voice-bidi-instant",
+        "gpt-4o-mini-transcribe-2025-12-15",
+        "gpt-4o-mini-transcribe",
+        "gpt-4o-transcribe",
+        "gpt-4o-transcribe-diarize",
+        "gpt-4o-mini-tts",
+        "gpt-4o-mini-audio-preview",
+        "gpt-4o-audio-preview",
+        "gpt-4o-realtime-preview",
+        "gpt-4o-mini-realtime-preview",
+        "gpt-4o-mini-image",
+        "gpt-5-audio",
+        "gpt-5-mini-tts",
+        "gpt-live-1.1-codex",
+        "TitanEmbeddingV2-Text",
+        "TitanEmbeddingsG1-Image",
+        "TitanEmbeddingsG1-Text",
+        "amazon.titan-embed-text-v2:0",
+        "amazon.titan-embed-image-v1",
+        "cohere.embed-english-v3",
+        "cohere.embed-multilingual-v3",
+        "cohere.embed-v4:0",
+        "cohere.rerank-v3-5:0",
+    ],
+)
+def test_non_text_models_are_out_of_scope(model):
+    m = map_model(model)
+    assert m["out_of_scope"] and m["model_class"] is None and not m["is_default_fallback"]
+
+
+@pytest.mark.parametrize(
+    "model,cls",
+    [
+        ("gpt-4o-mini", "A"),
+        ("gpt-4o-mini-search-preview", "A"),
+        ("gpt-4o-search-preview", "B"),
+        ("gpt-5-mini", "A"),
+        ("amazon.titan-text-express-v1", "B"),
+        ("DeepSeekV3", "C"),
+    ],
+)
+def test_text_models_keep_their_class_next_to_modality_rows(model, cls):
+    m = map_model(model)
+    assert not m["out_of_scope"] and m["model_class"] == cls
+
+
+def test_unknown_image_style_id_stays_unmapped():
+    m = map_model("img-1p-p-ev3")
+    assert m["is_default_fallback"] and m["model_class"] == "C" and m["warnings"]
+
+
+def test_out_of_scope_row_beats_longer_text_prefix():
+    assert map_model("gpt-4o-mini-transcribe-2025-12-15")["pattern"].startswith("whisper;")

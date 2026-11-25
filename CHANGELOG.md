@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased (3.4.0)
+
+- Out-of-scope rows now win whenever they match, instead of competing on literal prefix length. `gpt-4o-mini-transcribe-*` used to get Class A through `gpt-4o-mini`. Same fix for `gpt-4o-mini-audio-*`, `gpt-4o-mini-realtime-*`, `gpt-4o-mini-image`, `gemini-*-flash-live`, `gemini-*-flash-*-tts` and `gemini-*-transcribe`.
+- Identifiers are also tried with camelCase split into hyphens, so Bedrock names like `TitanEmbeddingV2-Text` and `TitanEmbeddingsG1-Image` match the Titan embedding and image rows instead of the class C default.
+- New out-of-scope patterns: `advanced-voice` (ChatGPT voice mode), `gpt-*-tts`, `gpt-*-audio`, `gpt-*-realtime`, `gpt-*-transcribe`, `gpt-*-image`, `gemini-*-native-audio`. No factor changed.
+- Documented the token basis for cache-write tokens (uncached input) and reasoning tokens (output, with Gemini `thoughtsTokenCount` added separately).
+
 ## 3.7.0 (2026-11-24)
 
 - Licence change. Package code is now PolyForm Noncommercial 1.0.0 and the bundled dataset v3.3.0 is under the SOMA AI Emission Factors Data Licence 1.0 (Non-Commercial). Free for personal use, academic and non-profit research, journalism, charities and government. Any use by a company or freelancer, including internal ESG/CSRD reporting, needs a commercial licence: https://somaai.earth/licensing (guillermollopis@somaai.earth).
