@@ -4,6 +4,7 @@
 [![Paper DOI](https://img.shields.io/badge/DOI-10.1016/j.spc.2026.11.003-blue.svg)](https://doi.org/10.1016/j.spc.2026.11.003)
 [![arXiv](https://img.shields.io/badge/arXiv-2606.10660-b31b1b.svg)](https://arxiv.org/abs/2606.10660)
 [![License: Non-Commercial](https://img.shields.io/badge/License-Non--Commercial-lightgrey.svg)](https://somaai.earth/licensing)
+[![SAEF MCP server on Glama](https://glama.ai/mcp/servers/guillermollopis/soma-ai-emission-factors/badges/score.svg)](https://glama.ai/mcp/servers/guillermollopis/soma-ai-emission-factors)
 
 SOMA AI Emission Factors (SAEF) is a versioned dataset of estimated carbon and water factors for AI inference, by model class and by region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions. Every factor traces to a file and a source, and the calculator returns the file, line and column behind each number. Published by [SOMA AI](https://somaai.earth), Barcelona, under a non-commercial licence, see the Licence section. The method is published in Sustainable Production and Consumption 70 (2026) 320-347, https://doi.org/10.1016/j.spc.2026.11.003 (free preprint arXiv 2606.10660).
 
