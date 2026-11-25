@@ -307,7 +307,7 @@ The factors follow the v3 lifecycle boundary. An estimate has four terms: electr
 
 ## Model types other than text (since dataset v3.4.0, speech, voice and video since v3.5.0)
 
-Text models are charged on tokens by class A, B or C. Ten more model types have their own unit and class, in `modality_factors.csv`. Every value there is an estimate, labelled `derived` (arithmetic on published benchmark results and documented facts) or `assumption` (an author judgement with a stated range). No provider publishes energy for these services.
+Text models are charged on tokens by class A, B or C. Eleven more model types have their own unit and class, in `modality_factors.csv`. Every value there is an estimate, labelled `derived` (arithmetic on published benchmark results and documented facts) or `assumption` (an author judgement with a stated range). No provider publishes energy for these services.
 
 | Model type | Class | Unit | Facility Wh, central (low to high) | g CO2e, eu-west-1 | g CO2e, us-east-1 |
 |---|---|---|---|---|---|
