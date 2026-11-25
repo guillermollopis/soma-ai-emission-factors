@@ -147,6 +147,10 @@ def estimate(
     if usage is not None:
         if tokens is not None or output_tokens is not None or input_tokens or cached_input_tokens:
             raise SaefError("Pass usage or token arguments, not both")
+        if "tokens" in usage:
+            if len(usage) > 1:
+                raise SaefError("usage tokens is a billed total and cannot be combined with other units")
+            return estimate(usage["tokens"], model, model_class, region, provider, megapixels=megapixels)
         keys = {_modality.canonical_unit(k)[0] if k != "output_tokens" else k for k in usage}
         mm = _calc.map_model(model) if model is not None else None
         plain = keys <= {"input_tokens", "cached_input_tokens", "output_tokens", "text_output_tokens"}

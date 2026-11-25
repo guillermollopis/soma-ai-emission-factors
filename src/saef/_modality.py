@@ -42,7 +42,7 @@ UNITS = {
 VIDEO_UNITS = tuple(u for u in UNITS if u.startswith("video_"))
 VOICE_MINUTES = ("user_audio_minutes", "assistant_audio_minutes", "context_minutes", "conversation_minutes")
 ALIASES = {
-    "tokens": "input_tokens", "embedding_tokens": "input_tokens", "tokens_scored": "input_tokens",
+    "embedding_tokens": "input_tokens", "tokens_scored": "input_tokens",
     "audio_input_tokens": "input_tokens", "text_input_tokens": "input_tokens", "image_input_tokens": "input_tokens",
 }
 # Billing units that name a model type by themselves, with the class charged when the identifier does not fit the unit.

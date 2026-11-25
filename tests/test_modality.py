@@ -411,6 +411,17 @@ def test_token_arguments_that_do_not_fit_are_errors():
         saef.estimate(model="gpt-4o", tokens=5, usage={"input_tokens": 5})
 
 
+def test_usage_tokens_is_a_billed_total():
+    assert saef.estimate(model="gpt-4o", usage={"tokens": 1e6}).kg_co2e == saef.estimate(model="gpt-4o", tokens=1e6).kg_co2e
+    assert saef.estimate(model="text-embedding-3-small", usage={"tokens": 1e6}).model_type == "embedding_text"
+    with pytest.raises(saef.SaefError, match="split"):
+        saef.estimate(model="gpt-image-2", usage={"tokens": 5000})
+    with pytest.raises(saef.SaefError, match="combined"):
+        saef.estimate(model="gpt-4o", usage={"tokens": 5000, "output_tokens": 5})
+    with pytest.raises(saef.SaefError, match="unknown usage unit"):
+        saef.estimate_modality("gpt-image-2", 5000, "tokens")
+
+
 def test_tracker_and_response_objects():
     t = Tracker(region="eu-west-1")
     assert t.record("text-embedding-3-small", 1000, 0)["model_class"] == "E-small"
