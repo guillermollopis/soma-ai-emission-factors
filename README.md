@@ -7,7 +7,7 @@
 
 SOMA AI Emission Factors (SAEF) is a versioned dataset of estimated carbon and water factors for AI inference, by model class and by region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions. Every factor traces to a file and a source, and the calculator returns the file, line and column behind each number. Published by [SOMA AI](https://somaai.earth), Barcelona, under a non-commercial licence, see the Licence section. The method is published in Sustainable Production and Consumption 70 (2026) 320-347, https://doi.org/10.1016/j.spc.2026.11.003 (free preprint arXiv 2606.10660).
 
-This repository holds the v3.3.0 tables (lifecycle boundary, dataset date 2026-10-02; the values are identical to v3.2.0, version DOI [10.5281/zenodo.24460344](https://doi.org/10.5281/zenodo.24460344), and v3.3.0 changes only the licence, see the release notes) and the source of the `saef` Python package. The complete deposit, with the reference calculator, the generator scripts and the supplementary documents, is on [Zenodo](https://doi.org/10.5281/zenodo.20443585).
+This repository holds the v3.4.0 tables (lifecycle boundary; text factor values dated 2026-10-02 and identical to v3.2.0 and v3.3.0, version DOI of v3.3.0 [10.5281/zenodo.24506078](https://doi.org/10.5281/zenodo.24506078); v3.4.0 adds embeddings, reranking, moderation, image generation and transcription) and the source of the `saef` Python package. The complete deposit, with the reference calculator, the generator scripts and the supplementary documents, is on [Zenodo](https://doi.org/10.5281/zenodo.20443585).
 
 ## How can I measure the environmental impact of the AI I use?
 
@@ -42,7 +42,7 @@ No. CodeCarbon reads the power of hardware you run, and its own README points us
 
 ### Where does purchased AI go in a GHG inventory?
 
-Under Scope 3 category 1 (purchased goods and services). Label the figure as an estimate, show a low-to-high band, and name the factor version used, for example SAEF v3.3.0.
+Under Scope 3 category 1 (purchased goods and services). Label the figure as an estimate, show a low-to-high band, and name the factor version used, for example SAEF v3.4.0.
 
 ### Can the energy use of a provider's AI be measured directly?
 
@@ -84,7 +84,7 @@ r.kg_co2e, r.kg_co2e_high_case, r.water_ml                      # estimates, wit
 saef estimate --tokens 1000000 --model gpt-4o-mini --region eu-west-1
 ```
 
-The package bundles the nine CSV files below and has no dependencies. It is built from this repository with `python scripts/sync_data.py && python -m build`.
+The package bundles the eleven CSV files below and has no dependencies. It is built from this repository with `python scripts/sync_data.py && python -m build`.
 
 ## Integrations
 
@@ -254,7 +254,7 @@ print(e.model_class, f"{e.kg_co2e:.3e}", f"{e.kg_co2e_high_case:.3e}", f"{e.wate
 B 2.231e-05 3.235e-05 0.0785
 ```
 
-Every figure is an estimate. Models the dataset treats as out of scope, such as embeddings, are skipped and counted in `totals()["skipped_calls"]`.
+Every figure is an estimate. Models the dataset treats as out of scope, such as text-to-speech, and calls whose usage does not fit the model type, are skipped and counted in `totals()["skipped_calls"]`.
 
 Example notebooks: [`examples/quickstart.ipynb`](examples/quickstart.ipynb), and a runnable copy on Kaggle, [Estimate the carbon footprint of your LLM API calls](https://www.kaggle.com/code/guillermollopis/estimate-the-carbon-footprint-of-your-llm-api-call).
 
@@ -319,6 +319,7 @@ Tools.
 
 - `estimate_footprint(tokens, model, region="global")` returns carbon in kg and g CO2e with a central and a high case, facility energy in Wh, water in mL where the region has a water factor, the model class, the region used, the dataset version and a provenance trail.
 - `estimate_chat_usage(messages, model, region="global")` returns the same for chat exchanges, using the dataset's short-chat default of 1,210 tokens per exchange (928 input, 282 output).
+- `estimate_modality(unit_count, unit, model, region="global", megapixels=None)` returns the same, with low and high, for embeddings, reranking, moderation, images and transcription.
 - `model_class(model)` returns the class letter (A small, B mid-size, C large) and a description.
 - `list_regions()` returns the accepted region codes, with names for cloud regions and countries.
 - `compare_regions(tokens, model, regions)` returns carbon and water per region, sorted from lowest to highest carbon.
@@ -335,7 +336,9 @@ Example prompt, "Using SAEF, what is the carbon and water footprint of 2 million
 | `grid_intensity_all.csv` | 240 | Grid carbon intensity (kg CO2e per kWh) for 210 countries and economies, 27 US eGRID subregions, EU-27, the world average and one subnational row, with the class factors at each grid |
 | `factors_v3_lifecycle.csv` | 102 | Class factors by class, GPU (H100 central, B200 sensitivity) and printed region, with the energy and the four terms |
 | `model_factors.csv` | 32 | Factors for the 18 measured open-weight models on H100 and B200, from the ML.ENERGY Leaderboard v3 |
-| `model_class_mapping.csv` | 220 | Identifier patterns, including AWS Bedrock, Azure and Vertex AI spellings, mapped to class A, B or C, plus the class C default for unmapped names |
+| `model_class_mapping.csv` | 254 | Identifier patterns, including AWS Bedrock, Azure and Vertex AI spellings, mapped to a model type (`model_type`, default `text`) and its class, plus the class C default for unmapped names |
+| `modality_factors.csv` | 55 | GPU, server and facility energy, lifecycle terms, and CO2e and water at reference regions per functional unit of the non-text model types, with low, central and high |
+| `modality_sources.csv` | 17 | Sources of `modality_factors.csv`, with licence and role |
 | `region_water_factors.csv` | 17 | On-site and off-site water factors under both hydropower conventions, with AWARE 2.0 scarcity weighting |
 | `region_grid_crosswalk.csv` | 17 | Printed region ids mapped to grids |
 | `token_basis_constants.csv` | 7 | Weights that convert billed tokens to effective tokens |
@@ -355,14 +358,66 @@ T_eff   = (T_out + 0.30 x T_in_uncached + 0.05 x T_in_cached) / 1.339
 
 Never multiply a billed token count by an inference footprint. At the default mix that overstates the result by about 3.1 times. Where only a billed total is known, use the default-mix factor per billed token, which already carries the conversion (0.302465 effective tokens per billed token at an 85% input share with no cache credit).
 
-- An unmapped identifier is assigned class C and flagged. Embeddings, image, audio, video and fine-tuning jobs are out of scope.
-- Out-of-scope rows (embedding, image, audio, video, moderation, rerank) win over any text-model row that also matches, so a name like `gpt-4o-mini-transcribe` never receives a class. Bedrock camelCase names such as `TitanEmbeddingV2-Text` are split at case boundaries before matching.
+- An unmapped identifier is assigned class C and flagged. Embeddings, reranking, moderation, images and transcription have their own model types, see below. Text-to-speech, realtime voice, video and fine-tuning jobs are out of scope.
+- Non-text and out-of-scope rows win over any text-model row that also matches, so a name like `gpt-4o-mini-transcribe` never receives a text class. Bedrock camelCase names such as `TitanEmbeddingV2-Text` are split at case boundaries before matching.
 - Token basis. Cache-write tokens (Anthropic `cache_creation_input_tokens`, Bedrock `cacheWriteInputTokens`) count as uncached input, weight W_in. Reasoning and thinking tokens count as output. OpenAI, Anthropic and Bedrock already include them in billed output, so add nothing. Gemini reports `thoughtsTokenCount` separately from `candidatesTokenCount`, so add it to output.
 - Unknown or global regions use the global-average grid. Water has no fallback, and covers 17 regions only.
 - Each result carries a conservative high case. A development line is reported separately and never added to a total.
 - Six significant figures are arithmetic, not evidence. The inputs support about two. Report the central value with the high case.
 
 The numbers are estimates, not measurements.
+
+## Model types other than text (since dataset v3.4.0)
+
+Text models are charged on tokens by class A, B or C. Six more model types have their own unit and class, in `modality_factors.csv`. Every value there is an estimate, labelled `derived` (arithmetic on published benchmark results and documented facts) or `assumption` (an author judgement with a stated range). No provider publishes energy for these services.
+
+| Model type | Class | Unit | Facility Wh, central (low to high) | g CO2e, eu-west-1 | g CO2e, us-east-1 |
+|---|---|---|---|---|---|
+| Text embeddings | E-small | 1,000 input tokens | 0.00057 (9e-05 to 0.052) | 0.00017 (2.7e-05 to 0.016) | 0.00018 (2.9e-05 to 0.017) |
+|  | E-large | 1,000 input tokens | 0.016 (0.0019 to 0.45) | 0.0049 (0.00057 to 0.14) | 0.0052 (0.00061 to 0.15) |
+| Image embeddings | E-small | image | 0.00015 (2.3e-05 to 0.0023) | 4.4e-05 (7e-06 to 0.00069) | 4.7e-05 (7.5e-06 to 0.00074) |
+|  | E-large | image | 0.016 (0.00048 to 0.45) | 0.0049 (0.00015 to 0.14) | 0.0052 (0.00016 to 0.15) |
+| Reranking | R-small | search unit | 0.029 (0.00075 to 0.58) | 0.0087 (0.00023 to 0.17) | 0.0093 (0.00024 to 0.19) |
+|  | R-large | search unit | 0.48 (0.0094 to 23) | 0.15 (0.0028 to 6.8) | 0.16 (0.003 to 7.3) |
+| Moderation | M-A | call | 0.0081 (0.0002 to 0.059) | 0.0024 (6.1e-05 to 0.018) | 0.0026 (6.5e-05 to 0.019) |
+|  | M-B | call | 0.026 (0.00034 to 0.16) | 0.008 (0.0001 to 0.049) | 0.0085 (0.00011 to 0.053) |
+| Token-billed images | IMG-TOK-B | 1024x1024 image, high quality | 0.73 (0.45 to 2.7) | 0.22 (0.14 to 0.82) | 0.24 (0.15 to 0.88) |
+|  | IMG-TOK-A | image, size and quality unknown | 0.54 (0.23 to 2.7) | 0.16 (0.069 to 0.82) | 0.17 (0.074 to 0.88) |
+| Per-image diffusion | D-small | image up to 1.05 MP | 0.54 (0.23 to 0.87) | 0.16 (0.069 to 0.26) | 0.17 (0.074 to 0.28) |
+|  | D-large | image up to 1.05 MP | 3.2 (2.4 to 4.4) | 0.97 (0.73 to 1.3) | 1 (0.78 to 1.4) |
+| Transcription | STT-ENC | audio minute | 0.06 (0.01 to 0.34) | 0.018 (0.0031 to 0.1) | 0.019 (0.0033 to 0.11) |
+|  | STT-LLM-A | audio minute | 0.027 (0.012 to 0.054) | 0.0081 (0.0037 to 0.016) | 0.0087 (0.0039 to 0.017) |
+|  | STT-LLM-B | audio minute | 0.088 (0.041 to 0.15) | 0.027 (0.012 to 0.045) | 0.028 (0.013 to 0.048) |
+
+How to map provider usage to a unit.
+
+- **Text embeddings** turn text into vectors. Use OpenAI `usage.prompt_tokens`, Bedrock Titan `inputTokenCount`, Cohere `meta.billed_units.input_tokens` or the Google token count, as `input_tokens`. Class E-small covers list prices of USD 0.05 per million tokens or less and disclosed sizes up to 1B. Everything else is E-large.
+- **Image embeddings** use `images`. Where the provider bills image tokens (Cohere Embed 4), pass them as `input_tokens`.
+- **Reranking** scores documents against a query. Pass the tokens scored, summed over all query and document pairs, as `input_tokens`, or billed `search_units` when tokens are unknown (30,000 tokens per unit is assumed, 5,000 to 50,000).
+- **Moderation** uses `input_tokens`, or `calls` when text length is unknown (500 tokens per call is assumed, 21 to 2,500). OpenAI moderation is free and absent from billing exports, so count calls in your own logs.
+- **Token-billed image generation** (gpt-image, Gemini image). Pass `usage.output_tokens` or `candidatesTokenCount` as `image_output_tokens`, input text and image tokens as `input_tokens`, and the number of `images`. An image token is charged as one output token of the model's text class, and a closed model is never charged below an open diffusion model: the central value is the higher of token parity and the D-small value (0.45 Wh per 1024x1024 image at server level), and the low value never falls below the smallest model ML.ENERGY measured. The high value reaches class C. Without an image count, the floor assumes 1,056 tokens per image and at least one image. Count-only units are `images`, `images_1024_low`, `images_1024_medium`, `images_1024_high` and `images_4k`.
+- **Per-image diffusion** (DALL-E, Imagen, Titan Image, Nova Canvas, Stable Diffusion, FLUX) uses `images`, with `megapixels=` above 1024x1024 (linear scaling, an assumption). Closed models with no disclosed size are D-large.
+- **Transcription.** Whisper and managed services use `audio_minutes` or `audio_seconds`. For gpt-4o-transcribe models pass the reported audio `input_tokens` and text `output_tokens`. Minutes are a fallback that assumes 1,000 audio tokens per minute.
+
+```python
+import saef
+
+saef.model_type_for("text-embedding-3-small")                                 # ('embedding_text', 'E-small')
+e = saef.estimate_modality("whisper-1", 60, "audio_minutes", region="eu-west-1")
+e.energy_wh, e.kg_co2e_low, e.kg_co2e, e.kg_co2e_high, e.water_ml             # facility Wh, kg CO2e, mL
+saef.estimate(model="gpt-image-1.5", region="eu-west-1",
+              usage={"input_tokens": 50, "image_output_tokens": 4160, "images": 1})
+```
+
+```bash
+saef modality --model dall-e-3 --unit images --count 100 --region eu-west-1
+```
+
+- **Routing.** A billing unit that names a model type (images, audio minutes, search units) decides before the model name. If the name does not fit the unit, the conservative default class of the unit is used and flagged in `warnings`.
+- **Energy chain.** Values are stored at GPU level and carried through the text chain unchanged: x 1.5 host x 1.1 idle = server, x 1.2 PUE = facility, then grid and water per region.
+- **Lifecycle.** Construction and embodied hardware are charged per server kWh at the class A ratio. **Training is excluded** for every model type in this section, because there is no basis for it. Disclose it as excluded.
+- **Ranges.** `low` and `high` are the class range of the energy at central overhead. `kg_co2e_high_case` is the central energy at the conservative overhead, as for text. The two are not combined. Ranges span two orders of magnitude for embeddings and Whisper, so report them with the central value.
+- **Excluded.** Text-to-speech, realtime voice, video, music, OCR and fine-tuning have no factor in v3.4.0 and raise an error. Free or failed generations that no export lists are not counted.
 
 ## Citation
 
@@ -372,7 +427,7 @@ The numbers are estimates, not measurements.
   title        = {{SOMA AI Emission Factors (SAEF)}},
   year         = {2026},
   publisher    = {Zenodo},
-  version      = {v3.3.0},
+  version      = {v3.4.0},
   doi          = {10.5281/zenodo.20443585},
   url          = {https://doi.org/10.5281/zenodo.20443585}
 }
