@@ -5,14 +5,14 @@ from . import _calc, _modality
 from ._calc import SaefError
 from ._modality import ModalityEstimate
 
-DATASET_VERSION = "3.4.0"
+DATASET_VERSION = "3.5.0"
 
 BIBTEX = """@misc{llopis2026somafactors,
   author       = {Llopis-Garcia, Guillermo},
   title        = {{SOMA AI Emission Factors (SAEF)}},
   year         = {2026},
   publisher    = {Zenodo},
-  version      = {v3.4.0},
+  version      = {v3.5.0},
   doi          = {10.5281/zenodo.20443585},
   url          = {https://doi.org/10.5281/zenodo.20443585}
 }
@@ -49,7 +49,7 @@ def model_class_for(model):
     An identifier that matches no pattern is assigned the conservative class C, as the dataset specifies."""
     m = _calc.map_model(model)
     if m["out_of_scope"]:
-        raise SaefError(f"{model!r} is out of scope (text-to-speech, realtime voice, video and other types with no factor yet)")
+        raise SaefError(f"{model!r} is out of scope (a type with no factor yet)")
     if m["model_type"] != "text":
         raise SaefError(f"{model!r} has no text class: model type {m['model_type']}, class {m['model_class']}. Use estimate_modality")
     return m["model_class"]
@@ -139,7 +139,7 @@ def estimate(
     region id, an ISO-3 country code, an eGRID subregion, 'eu-27' or None for the global average.
     Every number is traced in provenance by file, line and column.
 
-    A model that maps to a non-text model type (embeddings, rerank, moderation, image, transcription) returns a
+    A model that maps to a non-text model type (embeddings, rerank, moderation, image, transcription, speech, voice, video) returns a
     ModalityEstimate. usage is a dict of billed units, such as {"image_output_tokens": 4160, "images": 1},
     {"audio_minutes": 12} or {"input_tokens": 1e6}, and routes by unit before name. megapixels scales per-image
     diffusion models above 1024x1024.
@@ -212,7 +212,8 @@ def estimate_modality(model=None, unit_count=None, unit=None, region=None, provi
     """Estimate energy, kg CO2e and water for a non-text usage, each with low, central and high.
 
     unit is the billed unit: input_tokens, image_output_tokens, images, images_1024_high, audio_minutes, audio_seconds,
-    search_units, calls and so on (functional units of modality_factors.csv such as '1k_input_tokens' also work).
+    search_units, calls, characters, audio_output_tokens, conversation_minutes, active_session_minutes, video_seconds,
+    video_seconds_1080p and so on (functional units of modality_factors.csv such as '1k_input_tokens' also work).
     Pass model, or model_type with model_class. Use estimate(usage={...}) to combine several units of one call."""
     if unit is None or unit_count is None:
         raise SaefError("Pass unit_count and unit")

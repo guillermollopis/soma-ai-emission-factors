@@ -122,12 +122,12 @@ def estimate_chat_usage(messages: int, model: str, region: str = "global") -> di
 
 @mcp.tool()
 def estimate_modality(unit_count: float, unit: str, model: str, region: str = "global", megapixels: float | None = None) -> dict:
-    """Estimate carbon, energy and water for non-text AI usage (embeddings, reranking, moderation, image generation, transcription) using SOMA AI Emission Factors (SAEF).
+    """Estimate carbon, energy and water for non-text AI usage (embeddings, reranking, moderation, image generation, transcription, text-to-speech, realtime voice, video) using SOMA AI Emission Factors (SAEF).
 
     Args:
         unit_count: Number of billed units.
-        unit: Billed unit, for example "input_tokens", "image_output_tokens", "images", "images_1024_high", "audio_minutes", "audio_seconds", "search_units" or "calls".
-        model: Model identifier such as "text-embedding-3-small", "gpt-image-1.5", "dall-e-3" or "whisper-1".
+        unit: Billed unit, for example "input_tokens", "image_output_tokens", "images", "images_1024_high", "audio_minutes", "audio_seconds", "search_units", "calls", "characters", "audio_output_tokens", "conversation_minutes", "active_session_minutes", "video_seconds" (720p) or "video_seconds_1080p".
+        model: Model identifier such as "text-embedding-3-small", "gpt-image-1.5", "dall-e-3", "whisper-1" or "veo-3.1-fast".
         region: Cloud region id, ISO-3 country code, eGRID subregion, "eu-27" or "global". Use list_regions to see options.
         megapixels: Output size for per-image diffusion models above 1024x1024.
 
@@ -143,7 +143,7 @@ def estimate_modality(unit_count: float, unit: str, model: str, region: str = "g
 def model_class(model: str) -> dict:
     """Return the SAEF model class (A small, B mid-size, C large) for a model identifier.
 
-    SOMA AI Emission Factors (SAEF) assign factors by class, not by brand. A model that matches no known pattern gets the conservative class C. Embedding, rerank, moderation, image and transcription models have a model type instead of a text class and return an error, use estimate_modality for them.
+    SOMA AI Emission Factors (SAEF) assign factors by class, not by brand. A model that matches no known pattern gets the conservative class C. Embedding, rerank, moderation, image, transcription, speech, voice and video models have a model type instead of a text class and return an error, use estimate_modality for them.
     """
     cls = model_class_for(model)
     return {"model": model, "model_class": cls, "description": CLASS_DESCRIPTIONS[cls], "dataset_version": DATASET_VERSION}

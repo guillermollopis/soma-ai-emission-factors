@@ -99,6 +99,8 @@ def _rank(pattern):
 def _patterns():
     out = []
     for r in read("model_class_mapping.csv"):
+        if r["match_rule"] == "billing-unit-only":
+            continue
         for alt in r["pattern"].split(";"):
             alt = alt.strip().lower()
             if alt:
@@ -106,6 +108,20 @@ def _patterns():
                 out.append(((r["model_type"] != "text", _rank(alt)), rx, r))
     out.sort(key=lambda x: x[0], reverse=True)
     return out
+
+
+@lru_cache(maxsize=None)
+def _unit_only_patterns():
+    return [
+        (re.compile("".join(".*" if p == "*" else re.escape(p) for p in re.split(r"(\*)", alt.strip().lower()))), r)
+        for r in read("model_class_mapping.csv") if r["match_rule"] == "billing-unit-only" for alt in r["pattern"].split(";")
+    ]
+
+
+def unit_only_row(identifier):
+    """Mapping row that applies only when the billing unit belongs to its model type (gemini-omni video seconds)."""
+    cands = normalise_identifier(identifier)
+    return next((r for rx, r in _unit_only_patterns() if any(rx.match(c) for c in cands)), None)
 
 
 def _measured_id(cands):

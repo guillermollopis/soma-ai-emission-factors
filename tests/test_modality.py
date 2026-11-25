@@ -117,11 +117,11 @@ CUSTOMER = [
     ("gpt-image-2.5-flare", "image_generation_token_billed", "IMG-TOK-B"),
     ("gpt-image-2.5-sunburst", "image_generation_token_billed", "IMG-TOK-B"),
     ("gemini-3.1-flash-lite-image", "image_generation_token_billed", "IMG-TOK-A"),
-    ("advanced-voice-4o", "out-of-scope", None),
-    ("advanced-voice-bidi-instant", "out-of-scope", None),
+    ("advanced-voice-4o", "realtime_turn_based", "RT-B"),
+    ("advanced-voice-bidi-instant", "realtime_full_duplex", "FD-A"),
     ("gpt-4o-mini-transcribe-2025-12-15", "speech_to_text", "STT-LLM-A"),
-    ("gpt-4o-mini-tts", "out-of-scope", None),
-    ("gpt-live-1.1-codex", "out-of-scope", None),
+    ("gpt-4o-mini-tts", "tts", "TTS-B"),
+    ("gpt-live-1.1-codex", "realtime_full_duplex", "FD-A"),
     ("TitanEmbeddingV2-Text", "embedding_text", "E-small"),
     ("TitanEmbeddingsG1-Image", "embedding_text;embedding_image", "E-large"),
 ]
@@ -165,10 +165,33 @@ def test_img_1p_stays_unmapped_and_flagged():
         ("stability.sd3-5-large-v1:0", "image_generation_diffusion", "D-large"),
         ("whisper-1", "speech_to_text", "STT-ENC"),
         ("gpt-4o-transcribe-diarize", "speech_to_text", "STT-LLM-B"),
-        ("chirp-3-hd", "out-of-scope", None),
-        ("gemini-2.5-flash-preview-tts", "out-of-scope", None),
-        ("sora-2", "out-of-scope", None),
-        ("veo-3.1-fast", "out-of-scope", None),
+        ("chirp-3-hd", "tts", "TTS-B"),
+        ("gemini-2.5-flash-preview-tts", "tts", "TTS-B"),
+        ("sora-2", "video_generation", "V-A"),
+        ("veo-3.1-fast-generate-001", "video_generation", "V-A"),
+        ("veo-3.1-generate-001", "video_generation", "V-B"),
+        ("sora-2-pro", "video_generation", "V-C"),
+        ("kling-v2.1-pro", "video_generation", "V-B"),
+        ("kling-v2-master", "video_generation", "V-C"),
+        ("Wan-AI/Wan2.1-T2V-1.3B", "video_generation", "V-A"),
+        ("Wan-AI/Wan2.1-T2V-14B", "video_generation", "V-B"),
+        ("amazon.nova-reel-v1:0", "video_generation", "V-A"),
+        ("gen4_turbo", "video_generation", "V-A"),
+        ("gen4.5", "video_generation", "V-B"),
+        ("luma.ray-v2:0", "video_generation", "V-B"),
+        ("gemini-omni-flash-video", "video_generation", "V-A"),
+        ("gemini-omni-flash", "text", "B"),
+        ("gpt-realtime-mini-2025-10-06", "realtime_turn_based", "RT-A"),
+        ("gpt-4o-realtime-preview", "realtime_turn_based", "RT-B"),
+        ("gpt-4o-mini-realtime-preview", "realtime_turn_based", "RT-A"),
+        ("gemini-2.5-flash-native-audio", "realtime_turn_based", "RT-A"),
+        ("gemini-2.5-flash-live", "realtime_turn_based", "RT-A"),
+        ("amazon.nova-2-sonic-v1:0", "realtime_turn_based", "RT-A"),
+        ("gpt-realtime-whisper", "speech_to_text", "STT-ENC"),
+        ("gpt-5-mini-tts", "tts", "TTS-B"),
+        ("tts-1-hd", "tts", "TTS-B"),
+        ("gpt-4o-audio-preview", "out-of-scope", None),
+        ("luminous-base", "text", "C"),
         ("llama-guard-3-8b", "text", "A"),
         ("gemini-omni", "text", "B"),
         ("gpt-4o", "text", "B"),
@@ -176,6 +199,72 @@ def test_img_1p_stays_unmapped_and_flagged():
 )
 def test_model_types(model, mt, cls):
     assert saef.model_type_for(model) == (mt, cls)
+
+
+R2_GPU = [
+    ("tts", "TTS-B", "audio_minute", 0.03768, 0.02056, 0.206),
+    ("tts", "TTS-B", "1k_characters", 0.04186, 0.01958, 0.2747),
+    ("realtime_turn_based", "RT-A", "1k_audio_output_tokens", 0.02987, 0.01622, 0.05996),
+    ("realtime_turn_based", "RT-B", "user_audio_minute", 0.016, 0.003289, 0.02639),
+    ("realtime_turn_based", "RT-B", "assistant_audio_minute", 0.1347, 0.07646, 0.2194),
+    ("realtime_turn_based", "RT-B", "context_minute", 0.1127, 0.005572, 1.634),
+    ("realtime_turn_based", "RT-B", "conversation_minute", 0.1797, 0.03332, 1.768),
+    ("realtime_turn_based", "RT-C", "conversation_minute", 0.6692, 0.06676, 8.245),
+    ("realtime_full_duplex", "FD-A", "active_session_minute", 0.04236, 0.01338, 0.09594),
+    ("video_generation", "V-A", "video_second_720p", 11.93, 2.426, 38.97),
+    ("video_generation", "V-B", "video_second_720p", 41.68, 10.94, 170.5),
+    ("video_generation", "V-B", "video_second_1080p", 93.79, 13.13, 733.3),
+    ("video_generation", "V-C", "video_second_2160p", 312.6, 83.37, 4263),
+]
+
+
+@pytest.mark.parametrize("mt,cls,unit,c,lo,hi", R2_GPU)
+def test_release_2_rows_are_the_gpu_level_inputs(mt, cls, unit, c, lo, hi):
+    r = FACTORS[mt, cls, unit]
+    for case, want in (("central", c), ("low", lo), ("high", hi)):
+        assert float(r[f"gpu_wh_{case}"]) == pytest.approx(want, rel=1e-3)
+
+
+def test_eight_second_class_b_720p_clip_is_hundreds_of_wh():
+    e = saef.estimate_modality("veo-3.1-generate-001", 8, "video_seconds", "us-east-1")
+    assert e.model_class == "V-B" and 200 < e.gpu_energy_wh < 500 and 400 < e.energy_wh < 900
+    assert saef.estimate_modality("veo-3.1-generate-001", 1, "video_clips", "us-east-1").energy_wh == pytest.approx(e.energy_wh, rel=1e-4)
+    hd = saef.estimate_modality("veo-3.1-generate-001", 8, "video_seconds_1080p", "us-east-1")
+    assert hd.energy_wh == pytest.approx(2.25 * e.energy_wh, rel=1e-4)
+
+
+def test_gemini_omni_routes_by_billing_unit():
+    v = saef.estimate_modality("gemini-omni-flash", 8, "video_seconds")
+    assert (v.model_type, v.model_class) == ("video_generation", "V-A") and any("routed by the billing unit" in w for w in v.warnings)
+    u = saef.estimate_modality("gemini-omni", 8, "video_seconds")
+    assert (u.model_type, u.model_class) == ("video_generation", "V-C")
+    t = saef.estimate(model="gemini-omni-flash", input_tokens=1000, output_tokens=100)
+    assert t.model_class == "B" and not isinstance(t, saef.ModalityEstimate)
+    assert saef.estimate_modality("grok-imagine", 1, "images").model_type == "image_generation_diffusion"
+
+
+def test_voice_token_path_is_preferred_and_minutes_are_the_fallback():
+    usage = {"input_tokens": 9000, "cached_input_tokens": 8000, "text_output_tokens": 400, "audio_output_tokens": 2700}
+    e = saef.estimate(model="gpt-realtime", usage=usage, region="eu-west-1")
+    assert (e.model_type, e.model_class) == ("realtime_turn_based", "RT-B") and e.terms_kg_co2e["training"] == 0
+    t = saef.estimate(model_class="B", input_tokens=9000, cached_input_tokens=8000, output_tokens=400 + 1.1 * 2700, region="eu-west-1")
+    assert e.terms_kg_co2e["electricity"] == pytest.approx(t.terms_kg_co2e["electricity"], rel=1e-3)
+    plain = saef.estimate(model="gpt-realtime", input_tokens=10, output_tokens=10)
+    assert plain.usage["audio_output_tokens"] == 10
+    assert saef.estimate_modality("advanced-voice-4o", 10, "conversation_minutes").model_class == "RT-B"
+    assert saef.estimate_modality("advanced-voice-bidi-instant", 10, "active_session_minutes").model_class == "FD-A"
+    with pytest.raises(saef.SaefError, match="do not combine"):
+        saef.estimate(model="gpt-realtime", usage={"conversation_minutes": 5, "audio_output_tokens": 100})
+    with pytest.raises(saef.SaefError, match="active_session_minutes"):
+        saef.estimate(model="gpt-live-1.1-codex", input_tokens=10, output_tokens=10)
+
+
+def test_speech_units():
+    minute = saef.estimate_modality("gpt-4o-mini-tts", 1, "audio_minutes")
+    assert saef.estimate_modality("tts-1", 900, "characters").energy_wh == pytest.approx(minute.energy_wh, rel=1e-3)
+    tokens = saef.estimate(model="gpt-4o-mini-tts", usage={"input_tokens": 225, "audio_output_tokens": 1200})
+    assert tokens.energy_wh == pytest.approx(minute.energy_wh, rel=1e-3)
+    assert saef.estimate_modality("gpt-4o-mini-tts", 60, "audio_seconds").model_type == "tts"
 
 
 def test_text_class_of_a_modality_model_is_an_error():
@@ -245,6 +334,9 @@ def test_every_model_type_estimates_with_low_central_high():
         ("rerank-v3.5", 1e6, "tokens_scored"), ("omni-moderation-latest", 100, "calls"),
         ("gpt-image-2", 1e5, "image_output_tokens"), ("dall-e-3", 4, "images"), ("whisper-1", 60, "audio_minutes"),
         ("gpt-4o-mini-transcribe-2025-12-15", 60, "audio_minutes"),
+        ("gpt-4o-mini-tts", 1e5, "audio_output_tokens"), ("tts-1", 1e6, "characters"), ("gpt-realtime", 1e6, "audio_output_tokens"),
+        ("advanced-voice-4o", 60, "conversation_minutes"), ("gpt-live-1.1-codex", 60, "active_session_minutes"),
+        ("sora-2", 80, "video_seconds"), ("veo-3.1-generate-001", 8, "video_seconds_2160p"),
     ]:
         e = saef.estimate_modality(model, count, unit, "us-east-1")
         assert 0 < e.kg_co2e_low < e.kg_co2e < e.kg_co2e_high and e.kg_co2e < e.kg_co2e_high_case
@@ -297,8 +389,8 @@ def test_billing_unit_decides_before_the_name():
         (dict(model="dall-e-3", unit_count=5, unit="parsecs"), "unknown usage unit"),
         (dict(model="dall-e-3", unit_count=-1, unit="images"), ">= 0"),
         (dict(model="dall-e-3", unit_count=float("nan"), unit="images"), ">= 0"),
-        (dict(model="sora-2", unit_count=1, unit="images"), "out of scope"),
-        (dict(model="gpt-4o-mini-tts", unit_count=1, unit="audio_minutes"), "out of scope"),
+        (dict(model="lyria-2", unit_count=1, unit="images"), "out of scope"),
+        (dict(model="gpt-4o-audio-preview", unit_count=1, unit="audio_minutes"), "out of scope"),
         (dict(model_type="rerank", model_class="Z", unit_count=1, unit="search_units"), "no modality factors"),
         (dict(model="dall-e-3", unit_count=1, unit="images", region="mars-1"), "Unknown region"),
     ],
@@ -349,5 +441,5 @@ def test_cli_modality():
     assert "image_generation_diffusion" in p.stdout and "water mL" in p.stdout
     p = subprocess.run([sys.executable, "-m", "saef", "estimate", "--model", "text-embedding-3-small", "--tokens", "1000"], capture_output=True, text=True)
     assert p.returncode == 0 and "embedding_text" in p.stdout
-    p = subprocess.run([sys.executable, "-m", "saef", "modality", "--model", "sora-2", "--unit", "images", "--count", "1"], capture_output=True, text=True)
+    p = subprocess.run([sys.executable, "-m", "saef", "modality", "--model", "lyria-2", "--unit", "images", "--count", "1"], capture_output=True, text=True)
     assert p.returncode == 2

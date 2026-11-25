@@ -1,4 +1,4 @@
-"""Estimates for non-text model types (embeddings, rerank, moderation, images, transcription) from modality_factors.csv.
+"""Estimates for non-text model types (embeddings, rerank, moderation, images, transcription, speech, voice, video) from modality_factors.csv.
 
 Energy is stored per functional unit at GPU level and carried through the text chain (host, idle, PUE, grid, water).
 Construction and embodied are charged per server kWh at the class A ratio. No training term is charged."""
@@ -25,7 +25,22 @@ UNITS = {
     "calls": ("call", 1.0),
     "audio_minutes": ("audio_minute", 1.0),
     "audio_seconds": ("audio_minute", 1 / 60),
+    "characters": ("1k_characters", 1e-3),
+    "audio_output_tokens": ("1k_audio_output_tokens", 1e-3),
+    "user_audio_minutes": ("user_audio_minute", 1.0),
+    "assistant_audio_minutes": ("assistant_audio_minute", 1.0),
+    "context_minutes": ("context_minute", 1.0),
+    "conversation_minutes": ("conversation_minute", 1.0),
+    "active_session_minutes": ("active_session_minute", 1.0),
+    "video_seconds": ("video_second_720p", 1.0),
+    "video_seconds_480p": ("video_second_480p", 1.0),
+    "video_seconds_720p": ("video_second_720p", 1.0),
+    "video_seconds_1080p": ("video_second_1080p", 1.0),
+    "video_seconds_2160p": ("video_second_2160p", 1.0),
+    "video_clips": ("video_clip", 1.0),
 }
+VIDEO_UNITS = tuple(u for u in UNITS if u.startswith("video_"))
+VOICE_MINUTES = ("user_audio_minutes", "assistant_audio_minutes", "context_minutes", "conversation_minutes")
 ALIASES = {
     "tokens": "input_tokens", "embedding_tokens": "input_tokens", "tokens_scored": "input_tokens",
     "audio_input_tokens": "input_tokens", "text_input_tokens": "input_tokens", "image_input_tokens": "input_tokens",
@@ -42,12 +57,19 @@ UNIT_DEFAULTS = {
     "calls": ("moderation", "M-B"),
     "audio_minutes": ("speech_to_text", "STT-LLM-B"),
     "audio_seconds": ("speech_to_text", "STT-LLM-B"),
+    "characters": ("tts", "TTS-B"),
+    "audio_output_tokens": ("realtime_turn_based", "RT-C"),
+    "active_session_minutes": ("realtime_full_duplex", "FD-C"),
+    **{u: ("realtime_turn_based", "RT-C") for u in VOICE_MINUTES},
+    **{u: ("video_generation", "V-C") for u in VIDEO_UNITS},
 }
 INPUT_ONLY = {"embedding_text", "embedding_image", "rerank"}
 OUTPUT_UNIT = {
     "image_generation_token_billed": "image_output_tokens",
     "speech_to_text": "text_output_tokens",
     "moderation": "text_output_tokens",
+    "tts": "audio_output_tokens",
+    "realtime_turn_based": "audio_output_tokens",
 }
 LOOSE_IMAGE_UNITS = ("images", "images_1024_low", "images_1024_medium", "images_1024_high", "images_4k")
 MEGAPIXELS_1024 = 1.048576
@@ -142,6 +164,12 @@ def _resolve(model, mm, unit, warnings):
     """Factor row for one usage unit. A billing unit that names a model type decides before the identifier does."""
     if mm["out_of_scope"]:
         raise SaefError(f"{model!r} is out of scope: no model type covers it yet. {mm['warnings'][-1]}")
+    unit_row = _calc.unit_only_row(model) if model is not None else None
+    if unit_row is not None:
+        row = _pick((unit_row["model_type"],), unit_row["model_class"], unit)
+        if row is not None:
+            warnings.append(f"{model!r} is billed in {unit}: routed by the billing unit to {row['model_type']}, class {row['class']}")
+            return row
     types = mm["model_type"].split(";")
     if mm["model_type"] != "text":
         row = _pick(types, mm["model_class"], unit)
@@ -185,6 +213,8 @@ def estimate(model=None, usage=None, region=None, provider=None, megapixels=None
     warnings += reg["warnings"]
     p += mm["provenance"] + reg["provenance"]
 
+    if "conversation_minutes" in counts and len(counts) > 1:
+        raise SaefError("conversation_minutes already covers the whole call; do not combine it with other units")
     floor_images = None
     if "image_output_tokens" in counts:
         if any(u in counts for u in LOOSE_IMAGE_UNITS[1:]):

@@ -144,6 +144,76 @@ for cls in "AB":
     add("speech_to_text", name, "1k_cached_input_tokens", *tok(cls, CACHED), "derived", "R1-S01", "cached input tokens as cached text input of the class")
     add("speech_to_text", name, "1k_text_output_tokens", *tok(cls, OUT), "derived", "R1-S01", "transcript tokens as text output of the class")
 
+# ------------------------------------------------------------------ release 2 (SAEF v3.5.0)
+def band(cls, central, low, high):
+    """GPU Wh for (central, low, high) effective tokens at the class mean, lowest and highest member."""
+    return tuple(x * eff / 1000 for x, eff in zip(CLS[cls], (central, low, high)))
+
+
+# Text-to-speech. One class: backbone class A, lowest A member, class B mean (undisclosed); codec uplift 10% (0 to 50%).
+TTS_WH = (CLS["A"][0], CLS["A"][1], CLS["B"][0])
+TTS_SRC = "R2-S01;R2-S06;R2-S07;R2-S08"
+tts_min = tuple(w / 1000 * (n * (1 + up) + W_IN * 225) / D for w, n, up in zip(TTS_WH, (1200, 1200, 1500), (0.10, 0, 0.50)))
+add("tts", "TTS-B", "audio_minute", *tts_min, "derived", TTS_SRC,
+    "1,200 audio tokens per minute (1,500 high) at class A text energy per token (high: class B), codec uplift 10% (0 to 50%, assumption), 225 text input tokens")
+add("tts", "TTS-B", "1k_characters", *(m * 1000 / c for m, c in zip(tts_min, (900, 1050, 750))), "derived", TTS_SRC,
+    "audio_minute x 1,000 / characters per minute (900 central, 1,050 low, 750 high; assumption, English)")
+add("tts", "TTS-B", "1k_audio_output_tokens", *(w / D * (1 + up) for w, up in zip(TTS_WH, (0.10, 0, 0.50))), "derived", "R2-S01;R2-S06",
+    "preferred where usage reports audio tokens: one output token each plus codec uplift 10% (0 to 50%)")
+add("tts", "TTS-B", "1k_input_tokens", *(w * INP for w in TTS_WH), "derived", "R2-S01", "text input tokens as uncached text input")
+
+
+def realtime(s_u, s_a, n, p0, length, hit, codec, w_in):
+    """Effective tokens per user-audio minute, assistant-audio minute, context minute and conversation minute."""
+    inp = 600 * w_in / D
+    out = (1200 + 195 + 1200 * codec) / D
+    context = p0 + (s_u * 600 + s_a * (1200 + 195)) * length / 2
+    ctx = n * context * (hit * W_CACHE + (1 - hit) * w_in) / D
+    return inp, out, ctx, s_u * inp + s_a * out + ctx
+
+
+RT = [realtime(0.40, 0.45, 4, 1000, 5, 0.80, 0.10, 0.30), realtime(0.30, 0.35, 2, 300, 2, 0.95, 0.0, 0.10), realtime(0.50, 0.55, 6, 3000, 15, 0.50, 0.50, 0.40)]
+RT_ROWS = (
+    ("user_audio_minute", "600 audio input tokens x W_in (0.10 to 0.40) / D, first pass only"),
+    ("assistant_audio_minute", "(1,200 audio + 195 transcript tokens) / D + 10% codec uplift (0 to 50%)"),
+    ("context_minute", "re-reading of the conversation per conversation minute: 4 responses per minute (2 to 6), 1,000 prompt tokens (300 to 3,000), 5-minute session (2 to 15), cache hit 80% (95% to 50%)"),
+    ("conversation_minute", "0.40 x user-audio row + 0.45 x assistant-audio row + context row. Order-of-magnitude fallback, use only when token usage is not available"),
+)
+for cls in "ABC":
+    name = f"RT-{cls}"
+    add("realtime_turn_based", name, "1k_input_tokens", *tok(cls, INP), "derived", "R2-S01", "audio and text input tokens as uncached text input of the class")
+    add("realtime_turn_based", name, "1k_cached_input_tokens", *tok(cls, CACHED), "derived", "R2-S01", "cached input tokens as cached text input of the class")
+    add("realtime_turn_based", name, "1k_text_output_tokens", *tok(cls, OUT), "derived", "R2-S01", "text output tokens as text output of the class")
+    add("realtime_turn_based", name, "1k_audio_output_tokens", *(t * u for t, u in zip(tok(cls, OUT), (1.10, 1.0, 1.50))), "derived", "R2-S01;R2-S06",
+        "audio output tokens as text output of the class + codec uplift 10% (0 to 50%, assumption)")
+    for i, (unit, note) in enumerate(RT_ROWS):
+        add("realtime_turn_based", name, unit, *band(cls, *(case[i] for case in RT)), "assumption", "R2-S01;R2-S06", note)
+    add("realtime_full_duplex", f"FD-{cls}", "active_session_minute", *band(cls, 1200 * 1.30 / D, 750 * 1.10 / D, 1500 * 1.60 / D), "assumption", "R2-S01;R2-S06;R2-S08;R2-S10;R2-S18",
+        "one decode step per audio frame for the whole active session (20 Hz central, 12.5 to 25 Hz), one output token each, depth and codec uplift 30% (10 to 60%). Standby minutes are zero. Backend model tokens go through the text factors")
+
+# Video. Anchors: GPU Wh per megapixel-frame, ML.ENERGY (best H100 configuration) and Delavande et al. (H100, batch 1).
+MP_FRAMES = 1.2800 * 0.7200 * 24
+WAN13_720, WAN14_720 = 78.8 / (1.2800 * 0.7200 * 81), 359.7 / (1.2800 * 0.7200 * 81)
+WAN13_480, COGVIDEOX15, WAN14_480, HUNYUAN = 0.5484, 1.1011, 2.474, 2.7199
+SERVING = (0.5, 0.2, 1.0)
+V720 = {
+    "A": ((WAN13_720 + COGVIDEOX15) / 2, WAN13_480, max(WAN13_720, COGVIDEOX15)),
+    "B": ((HUNYUAN + WAN14_720) / 2, WAN14_480, WAN14_720),
+}
+V720 = {c: tuple(a * MP_FRAMES * f * q for a, f, q in zip(v, SERVING, (1, 1, 24 / 15))) for c, v in V720.items()}
+V720["C"] = (V720["B"][0] * 2.5, V720["B"][0], V720["B"][2] * 2.5)
+RESOLUTION = {"480p": (0.40, 0.22, 0.45), "720p": (1, 1, 1), "1080p": (2.25, 1.2, 4.3), "2160p": (3.0, 2.0, 10.0)}
+ANCHOR = {
+    "A": "anchor Wan2.1-1.3B and CogVideoX1.5-5B, Wh per megapixel-frame", "B": "anchor HunyuanVideo 13B and Wan2.1-14B, Wh per megapixel-frame",
+    "C": "class B x 2.5 (assumption, no model of this class has published energy)",
+}
+VSRC = "R2-S02;R2-S03;R2-S08;R2-S13;R2-S14;R2-S15"
+for cls in "ABC":
+    for res, mult in RESOLUTION.items():
+        add("video_generation", f"V-{cls}", f"video_second_{res}", *(v * m for v, m in zip(V720[cls], mult)), "assumption" if cls == "C" else "derived", VSRC,
+            f"{ANCHOR[cls]}; 22.1 megapixel-frames per second (720p, 24 fps); serving factor 0.5 (0.2 to 1.0, assumption); resolution multiplier {mult[0]:g} ({mult[1]:g} to {mult[2]:g}, assumption); text-to-video and image-to-video alike")
+    add("video_generation", f"V-{cls}", "video_clip", *(v * 8 for v in V720[cls]), "assumption", VSRC, "clip count only: 8 seconds at 720p (assumption)")
+
 # ------------------------------------------------------------------ chain and reference regions
 WATER = {r["region_id"]: r for r in read("region_water_factors.csv")}
 REGIONS = ("eu-west-1", "us-east-1", "global-average")

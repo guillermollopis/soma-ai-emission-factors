@@ -59,7 +59,7 @@ def test_estimate_modality():
     with pytest.raises(ValueError):
         m.estimate_modality(-1, "images", "dall-e-3")
     with pytest.raises(saef.SaefError):
-        m.estimate_modality(1, "images", "gpt-4o-mini-tts")
+        m.estimate_modality(1, "images", "lyria-2")
 
 
 def test_list_regions():

@@ -33,7 +33,7 @@ def test_factor_matches_csv(cls, region_id):
     t = f["terms"]
     assert t["electricity"] + t["embodied"] + t["construction"] == pytest.approx(f["kg_co2e_per_1m_effective_tokens"], rel=1e-4)
     assert t["training_per_1m_billed_tokens"] == float(r[f"class_{c}_training_kg_per_m_billed_tokens"])
-    assert f["version"] == saef.DATASET_VERSION == "3.4.0"
+    assert f["version"] == saef.DATASET_VERSION == "3.5.0"
 
 
 def test_estimate_matches_hand_calculation():
@@ -159,19 +159,8 @@ def test_parity_with_official_calculator():
 @pytest.mark.parametrize(
     "model",
     [
-        "gemini-2.5-flash-preview-tts",
-        "gemini-2.5-flash-live",
-        "gemini-2.5-flash-native-audio",
-        "advanced-voice-4o",
-        "advanced-voice-bidi-instant",
-        "gpt-4o-mini-tts",
-        "gpt-4o-mini-audio-preview",
-        "gpt-4o-audio-preview",
-        "gpt-4o-realtime-preview",
-        "gpt-4o-mini-realtime-preview",
-        "gpt-5-audio",
-        "gpt-5-mini-tts",
-        "gpt-live-1.1-codex",
+        "gpt-4o-mini-audio-preview", "gpt-4o-audio-preview", "gpt-5-audio", "gemini-2.5-flash-transcribe", "lyria-2",
+        "seedream-4", "grok-voice", "mistral-ocr-latest", "nova-multimodal-embeddings", "marengo-embed-2-7", "minimax-music",
     ],
 )
 def test_types_without_a_factor_are_out_of_scope(model):
@@ -202,7 +191,7 @@ def test_unknown_image_style_id_stays_unmapped():
 
 def test_modality_row_beats_longer_text_prefix():
     assert map_model("gpt-4o-mini-transcribe-2025-12-15")["model_type"] == "speech_to_text"
-    assert map_model("gpt-4o-mini-tts-2025-12-15")["out_of_scope"]
+    assert map_model("gpt-4o-mini-tts-2025-12-15")["model_type"] == "tts"
 
 
 def test_every_mapping_row_has_a_model_type_and_every_modality_class_has_factors():

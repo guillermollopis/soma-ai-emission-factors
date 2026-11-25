@@ -59,11 +59,11 @@ def main(argv=None):
     e.add_argument("--provider", default=None)
     e.add_argument("--json", action="store_true")
 
-    m = sub.add_parser("modality", help="estimate an embedding, rerank, moderation, image or transcription usage")
+    m = sub.add_parser("modality", help="estimate an embedding, rerank, moderation, image, transcription, speech, voice or video usage")
     m.add_argument("--model")
     m.add_argument("--model-type", dest="model_type", help="with --model-class, instead of --model")
     m.add_argument("--model-class", dest="model_class")
-    m.add_argument("--unit", required=True, help="for example input_tokens, image_output_tokens, images, audio_minutes, search_units, calls")
+    m.add_argument("--unit", required=True, help="for example input_tokens, image_output_tokens, images, audio_minutes, search_units, calls, characters, conversation_minutes, video_seconds_1080p")
     m.add_argument("--count", type=float, required=True)
     m.add_argument("--megapixels", type=float, default=None, help="per-image diffusion models above 1024x1024")
     m.add_argument("--region", default=None)
