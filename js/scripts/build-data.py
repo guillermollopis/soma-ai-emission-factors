@@ -35,20 +35,20 @@ for c in "abc":
         f"class_{c}_factor_kg_per_m_billed_tokens_default_mix",
     ]
 
-version = "3.4.0"
+version = "3.5.0"
 init = (src / "_core.py").read_text(encoding="utf-8")
 assert f'DATASET_VERSION = "{version}"' in init
 
 out = {
     "datasetVersion": version,
     "datasetDoi": "10.5281/zenodo.20443585",
-    # TODO on publish: the v3.4.0 version DOI
+    # TODO on publish: the v3.5.0 version DOI
     "datasetVersionDoi": "10.5281/zenodo.24460344",
     "paperDoi": "10.1016/j.spc.2026.11.003",
     "constants": pick(rows("token_basis_constants.csv"), ["constant", "central"]),
     "modelClassMapping": pick(
         rows("model_class_mapping.csv"),
-        ["pattern", "provider", "model_class", "basis", "size_or_tier_note", "own_factor_model_id", "notes", "model_type"],
+        ["pattern", "provider", "model_class", "basis", "size_or_tier_note", "own_factor_model_id", "notes", "model_type", "match_rule"],
     ),
     "modelFactors": pick(
         rows("model_factors.csv"),

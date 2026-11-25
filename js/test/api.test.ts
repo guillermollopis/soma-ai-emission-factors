@@ -51,13 +51,15 @@ describe("api", () => {
 describe("model mapping", () => {
   it("non-text and out-of-scope rows win over longer text prefixes, camelCase ids are split", () => {
     expect(mapModel("gpt-4o-mini-transcribe-2025-12-15").modelType).toBe("speech_to_text");
-    expect(mapModel("gpt-4o-mini-tts").outOfScope).toBe(true);
+    expect(mapModel("gpt-4o-mini-tts").modelType).toBe("tts");
+    expect(mapModel("gemini-omni-flash").modelClass).toBe("B");
     expect(mapModel("TitanEmbeddingV2-Text").modelType).toBe("embedding_text");
     expect(mapModel("TitanEmbeddingsG1-Image").modelClass).toBe("E-large");
-    expect(mapModel("advanced-voice-4o").outOfScope).toBe(true);
+    expect(mapModel("advanced-voice-4o").modelType).toBe("realtime_turn_based");
+    expect(mapModel("gpt-4o-audio-preview").outOfScope).toBe(true);
     expect(mapModel("DeepSeekV3").modelClass).toBe("C");
     expect(mapModel("img-1p-p-ev3").isDefaultFallback).toBe(true);
     expect(() => estimate({ model: "gpt-image-2", outputTokens: 10 })).toThrow(/Python package/);
-    expect(() => estimate({ model: "gpt-4o-mini-tts", outputTokens: 10 })).toThrow(/out of scope/);
+    expect(() => estimate({ model: "gpt-4o-audio-preview", outputTokens: 10 })).toThrow(/out of scope/);
   });
 });

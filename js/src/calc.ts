@@ -102,6 +102,7 @@ function patterns(): Pattern[] {
   if (patternsCache) return patternsCache;
   const out: Pattern[] = [];
   for (const row of D.modelClassMapping) {
+    if (row.match_rule === "billing-unit-only") continue;
     for (let alt of row.pattern.split(";")) {
       alt = alt.trim().toLowerCase();
       if (!alt) continue;

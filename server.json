@@ -8,13 +8,13 @@
     "source": "github"
   },
   "websiteUrl": "https://somaai.earth/ai-footprint",
-  "version": "3.8.0",
+  "version": "3.9.0",
   "packages": [
     {
       "registryType": "pypi",
       "registryBaseUrl": "https://pypi.org",
       "identifier": "saef",
-      "version": "3.8.0",
+      "version": "3.9.0",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
