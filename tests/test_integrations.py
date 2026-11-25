@@ -63,7 +63,7 @@ def test_tracker_totals_log_and_fallbacks(tmp_path):
     t = Tracker(region="eu-west-1", log_path=str(log))
     a = t.record("gpt-4o", 100, 50)
     t.record("gpt-4o", 100, 50, region="not-a-region")
-    assert t.record("text-embedding-3-small", 100, 0) is None
+    assert t.record("gpt-4o-mini-tts", 100, 0) is None
     tot = t.totals()
     assert tot["calls"] == 2 and tot["skipped_calls"] == 1
     assert tot["kg_co2e"] == pytest.approx(2 * a["kg_co2e"])

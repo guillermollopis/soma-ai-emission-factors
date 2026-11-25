@@ -51,6 +51,17 @@ def test_out_of_scope_model_raises():
         m.model_class("text-embedding-3-small")
 
 
+def test_estimate_modality():
+    r = m.estimate_modality(1_000_000, "input_tokens", "text-embedding-3-small", "eu-west-1")
+    assert r["model_type"] == "embedding_text" and r["dataset_version"] == saef.DATASET_VERSION
+    assert r["carbon"]["low_kg_co2e"] < r["carbon"]["kg_co2e"] < r["carbon"]["high_kg_co2e"]
+    assert r["energy"]["facility_wh"] > 0 and r["water"]["ml"] > 0
+    with pytest.raises(ValueError):
+        m.estimate_modality(-1, "images", "dall-e-3")
+    with pytest.raises(saef.SaefError):
+        m.estimate_modality(1, "images", "gpt-4o-mini-tts")
+
+
 def test_list_regions():
     r = m.list_regions()
     ids = {c["region"] for c in r["cloud_regions"]}
@@ -86,6 +97,6 @@ def test_tools_and_resource_registered():
     import asyncio
 
     tools = {t.name for t in asyncio.run(m.mcp.list_tools())}
-    assert tools == {"estimate_footprint", "estimate_chat_usage", "model_class", "list_regions", "compare_regions"}
+    assert tools == {"estimate_footprint", "estimate_chat_usage", "estimate_modality", "model_class", "list_regions", "compare_regions"}
     uris = {str(r.uri) for r in asyncio.run(m.mcp.list_resources())}
     assert "saef://about" in uris

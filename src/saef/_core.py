@@ -1,17 +1,18 @@
 from dataclasses import dataclass, field
 from typing import Optional
 
-from . import _calc
+from . import _calc, _modality
 from ._calc import SaefError
+from ._modality import ModalityEstimate
 
-DATASET_VERSION = "3.3.0"
+DATASET_VERSION = "3.4.0"
 
 BIBTEX = """@misc{llopis2026somafactors,
   author       = {Llopis-Garcia, Guillermo},
   title        = {{SOMA AI Emission Factors (SAEF)}},
   year         = {2026},
   publisher    = {Zenodo},
-  version      = {v3.3.0},
+  version      = {v3.4.0},
   doi          = {10.5281/zenodo.20443585},
   url          = {https://doi.org/10.5281/zenodo.20443585}
 }
@@ -48,8 +49,18 @@ def model_class_for(model):
     An identifier that matches no pattern is assigned the conservative class C, as the dataset specifies."""
     m = _calc.map_model(model)
     if m["out_of_scope"]:
-        raise SaefError(f"{model!r} is out of scope (embeddings, image, audio, video or moderation)")
+        raise SaefError(f"{model!r} is out of scope (text-to-speech, realtime voice, video and other types with no factor yet)")
+    if m["model_type"] != "text":
+        raise SaefError(f"{model!r} has no text class: model type {m['model_type']}, class {m['model_class']}. Use estimate_modality")
     return m["model_class"]
+
+
+def model_type_for(model):
+    """(model_type, class) of an identifier: ('text', 'B'), ('embedding_text', 'E-small'), ('out-of-scope', None)...
+
+    A model with two types, such as a multimodal embedder, returns them joined by ';'."""
+    m = _calc.map_model(model)
+    return m["model_type"], m["model_class"]
 
 
 def factor(model_class="B", region="us-east-1", provider=None):
@@ -118,6 +129,8 @@ def estimate(
     output_tokens=None,
     input_tokens=0.0,
     cached_input_tokens=0.0,
+    usage=None,
+    megapixels=None,
 ):
     """Estimate kg CO2e (and water in mL where the region has a water factor) for AI inference.
 
@@ -125,12 +138,44 @@ def estimate(
     cached_input_tokens for a billing-export split. Pass model or model_class. region may be a cloud
     region id, an ISO-3 country code, an eGRID subregion, 'eu-27' or None for the global average.
     Every number is traced in provenance by file, line and column.
+
+    A model that maps to a non-text model type (embeddings, rerank, moderation, image, transcription) returns a
+    ModalityEstimate. usage is a dict of billed units, such as {"image_output_tokens": 4160, "images": 1},
+    {"audio_minutes": 12} or {"input_tokens": 1e6}, and routes by unit before name. megapixels scales per-image
+    diffusion models above 1024x1024.
     """
+    if usage is not None:
+        if tokens is not None or output_tokens is not None or input_tokens or cached_input_tokens:
+            raise SaefError("Pass usage or token arguments, not both")
+        keys = {_modality.canonical_unit(k)[0] if k != "output_tokens" else k for k in usage}
+        mm = _calc.map_model(model) if model is not None else None
+        plain = keys <= {"input_tokens", "cached_input_tokens", "output_tokens", "text_output_tokens"}
+        if not (plain and (mm is None or mm["model_type"] == "text")):
+            if model is None:
+                raise SaefError("usage with non-token units needs model; use estimate_modality for an explicit model_type")
+            usage = dict(usage)
+            if "output_tokens" in usage:
+                unit = next((_modality.OUTPUT_UNIT[t] for t in mm["model_type"].split(";") if t in _modality.OUTPUT_UNIT), None)
+                if unit is None:
+                    raise SaefError(f"{model!r} (model type {mm['model_type']}) has no output tokens to charge")
+                usage[unit] = usage.get(unit, 0) + usage.pop("output_tokens")
+            return _modality.estimate(model, usage, region, provider, megapixels, version=DATASET_VERSION)
+        split = {"input_tokens": 0.0, "cached_input_tokens": 0.0, "output_tokens": 0.0}
+        for k, v in usage.items():
+            name = k if k == "output_tokens" else _modality.canonical_unit(k)[0]
+            scale = 1.0 if k == "output_tokens" else _modality.canonical_unit(k)[1]
+            split["output_tokens" if name == "text_output_tokens" else name] += v * scale
+        input_tokens, cached_input_tokens, output_tokens = split["input_tokens"], split["cached_input_tokens"], split["output_tokens"]
     if (tokens is None) == (output_tokens is None):
         raise SaefError("Pass either tokens (billed total) or output_tokens (with input_tokens)")
     given = tokens if tokens is not None else output_tokens
     if given < 0 or input_tokens < 0 or cached_input_tokens < 0:
         raise SaefError("token counts must be >= 0")
+    if model is not None and model_class is None:
+        mm = _calc.map_model(model)
+        if mm["model_type"] not in ("text", "out-of-scope"):
+            split = _modality.usage_from_tokens(mm, model, tokens, output_tokens, input_tokens, cached_input_tokens)
+            return _modality.estimate(model, split, region, provider, megapixels, version=DATASET_VERSION)
     r = _calc.emissions(
         model=model, model_class=model_class, provider=provider, region=region,
         billed_tokens=tokens, output_tokens=output_tokens or 0.0,
@@ -160,6 +205,18 @@ def estimate(
         provenance=r["provenance"] + w["provenance"],
         water=w,
     )
+
+
+def estimate_modality(model=None, unit_count=None, unit=None, region=None, provider=None, megapixels=None,
+                      model_type=None, model_class=None):
+    """Estimate energy, kg CO2e and water for a non-text usage, each with low, central and high.
+
+    unit is the billed unit: input_tokens, image_output_tokens, images, images_1024_high, audio_minutes, audio_seconds,
+    search_units, calls and so on (functional units of modality_factors.csv such as '1k_input_tokens' also work).
+    Pass model, or model_type with model_class. Use estimate(usage={...}) to combine several units of one call."""
+    if unit is None or unit_count is None:
+        raise SaefError("Pass unit_count and unit")
+    return _modality.estimate(model, {unit: unit_count}, region, provider, megapixels, model_type, model_class, DATASET_VERSION)
 
 
 def citation():

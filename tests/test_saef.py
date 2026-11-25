@@ -33,7 +33,7 @@ def test_factor_matches_csv(cls, region_id):
     t = f["terms"]
     assert t["electricity"] + t["embodied"] + t["construction"] == pytest.approx(f["kg_co2e_per_1m_effective_tokens"], rel=1e-4)
     assert t["training_per_1m_billed_tokens"] == float(r[f"class_{c}_training_kg_per_m_billed_tokens"])
-    assert f["version"] == saef.DATASET_VERSION == "3.3.0"
+    assert f["version"] == saef.DATASET_VERSION == "3.4.0"
 
 
 def test_estimate_matches_hand_calculation():
@@ -159,42 +159,22 @@ def test_parity_with_official_calculator():
 @pytest.mark.parametrize(
     "model",
     [
-        "gpt-image-2",
-        "gpt-image-2-tpp-rgba",
-        "gpt-image-1.5-2025-12-16",
-        "gpt-image-2.5-flare",
-        "gpt-image-2.5-sunburst",
-        "gemini-3.1-flash-lite-image",
         "gemini-2.5-flash-preview-tts",
         "gemini-2.5-flash-live",
         "gemini-2.5-flash-native-audio",
         "advanced-voice-4o",
         "advanced-voice-bidi-instant",
-        "gpt-4o-mini-transcribe-2025-12-15",
-        "gpt-4o-mini-transcribe",
-        "gpt-4o-transcribe",
-        "gpt-4o-transcribe-diarize",
         "gpt-4o-mini-tts",
         "gpt-4o-mini-audio-preview",
         "gpt-4o-audio-preview",
         "gpt-4o-realtime-preview",
         "gpt-4o-mini-realtime-preview",
-        "gpt-4o-mini-image",
         "gpt-5-audio",
         "gpt-5-mini-tts",
         "gpt-live-1.1-codex",
-        "TitanEmbeddingV2-Text",
-        "TitanEmbeddingsG1-Image",
-        "TitanEmbeddingsG1-Text",
-        "amazon.titan-embed-text-v2:0",
-        "amazon.titan-embed-image-v1",
-        "cohere.embed-english-v3",
-        "cohere.embed-multilingual-v3",
-        "cohere.embed-v4:0",
-        "cohere.rerank-v3-5:0",
     ],
 )
-def test_non_text_models_are_out_of_scope(model):
+def test_types_without_a_factor_are_out_of_scope(model):
     m = map_model(model)
     assert m["out_of_scope"] and m["model_class"] is None and not m["is_default_fallback"]
 
@@ -220,5 +200,18 @@ def test_unknown_image_style_id_stays_unmapped():
     assert m["is_default_fallback"] and m["model_class"] == "C" and m["warnings"]
 
 
-def test_out_of_scope_row_beats_longer_text_prefix():
-    assert map_model("gpt-4o-mini-transcribe-2025-12-15")["pattern"].startswith("whisper;")
+def test_modality_row_beats_longer_text_prefix():
+    assert map_model("gpt-4o-mini-transcribe-2025-12-15")["model_type"] == "speech_to_text"
+    assert map_model("gpt-4o-mini-tts-2025-12-15")["out_of_scope"]
+
+
+def test_every_mapping_row_has_a_model_type_and_every_modality_class_has_factors():
+    factors = {(r["model_type"], r["class"]) for r in rows("modality_factors.csv")}
+    for r in rows("model_class_mapping.csv"):
+        if r["model_type"] == "text":
+            assert r["model_class"] in "ABC"
+        elif r["model_type"] == "out-of-scope":
+            assert r["model_class"] == "out-of-scope"
+        else:
+            for t in r["model_type"].split(";"):
+                assert (t, r["model_class"]) in factors, r["pattern"]

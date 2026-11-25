@@ -1,7 +1,8 @@
 """MCP server exposing SAEF estimates to AI agents over stdio. Needs the optional `mcp` extra."""
 from mcp.server.fastmcp import FastMCP
 
-from . import DATASET_VERSION, SaefError, __version__, estimate, model_class_for
+from . import DATASET_VERSION, ModalityEstimate, SaefError, __version__, estimate, model_class_for
+from . import estimate_modality as _estimate_modality
 from . import _calc
 
 EXCHANGE_INPUT_TOKENS = 928
@@ -50,7 +51,16 @@ def _report(e):
         "citation": f"SOMA AI Emission Factors (SAEF) v{e.version}, doi:{DOI}; method paper doi:{PAPER_DOI}",
         "note": NOTE,
     }
-    if grid > 0:
+    if isinstance(e, ModalityEstimate):
+        out["model_type"] = e.model_type
+        out["usage"] = e.usage
+        out["carbon"].update(low_kg_co2e=e.kg_co2e_low, high_kg_co2e=e.kg_co2e_high)
+        out["carbon"]["note"] = e.note
+        out["energy"] = {
+            "facility_wh": e.energy_wh, "facility_wh_low": e.energy_wh_low, "facility_wh_high": e.energy_wh_high,
+            "note": "Facility-level electricity including cooling and overhead, with the class range.",
+        }
+    elif grid > 0:
         out["energy"] = {
             "facility_wh": e.terms_kg_co2e["electricity"] / grid * 1000,
             "note": "Facility-level electricity including cooling and overhead, derived from the electricity term and the grid intensity.",
@@ -111,10 +121,29 @@ def estimate_chat_usage(messages: int, model: str, region: str = "global") -> di
 
 
 @mcp.tool()
+def estimate_modality(unit_count: float, unit: str, model: str, region: str = "global", megapixels: float | None = None) -> dict:
+    """Estimate carbon, energy and water for non-text AI usage (embeddings, reranking, moderation, image generation, transcription) using SOMA AI Emission Factors (SAEF).
+
+    Args:
+        unit_count: Number of billed units.
+        unit: Billed unit, for example "input_tokens", "image_output_tokens", "images", "images_1024_high", "audio_minutes", "audio_seconds", "search_units" or "calls".
+        model: Model identifier such as "text-embedding-3-small", "gpt-image-1.5", "dall-e-3" or "whisper-1".
+        region: Cloud region id, ISO-3 country code, eGRID subregion, "eu-27" or "global". Use list_regions to see options.
+        megapixels: Output size for per-image diffusion models above 1024x1024.
+
+    Returns energy, carbon and water with low, central and high values, the model type and class, warnings and provenance.
+    All figures are estimates, not measurements. No training term is charged for these model types.
+    """
+    if not unit_count >= 0:
+        raise ValueError("unit_count must be >= 0")
+    return _report(_estimate_modality(model, unit_count, unit, region=region, megapixels=megapixels))
+
+
+@mcp.tool()
 def model_class(model: str) -> dict:
     """Return the SAEF model class (A small, B mid-size, C large) for a model identifier.
 
-    SOMA AI Emission Factors (SAEF) assign factors by class, not by brand. A model that matches no known pattern gets the conservative class C. Embeddings, image, audio, video and moderation models are out of scope and return an error.
+    SOMA AI Emission Factors (SAEF) assign factors by class, not by brand. A model that matches no known pattern gets the conservative class C. Embedding, rerank, moderation, image and transcription models have a model type instead of a text class and return an error, use estimate_modality for them.
     """
     cls = model_class_for(model)
     return {"model": model, "model_class": cls, "description": CLASS_DESCRIPTIONS[cls], "dataset_version": DATASET_VERSION}

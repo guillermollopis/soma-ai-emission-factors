@@ -1,7 +1,7 @@
 """Estimates from API response objects. Duck-typed, so no SDK import is needed.
 
 Handles OpenAI Chat Completions, OpenAI Responses and Anthropic Messages objects, or the same shapes as dicts."""
-from .. import SaefError, estimate
+from .. import SaefError, estimate, model_type_for
 from ._base import default_region
 
 
@@ -42,12 +42,35 @@ def usage_from_response(resp):
     return model, inp + write, read, out
 
 
+def _billed_units(resp, model, inp, cached, out):
+    """Usage units for responses that carry more than a token split: generated images and transcription seconds."""
+    if model_type_for(model)[0] != "image_generation_token_billed":
+        return None
+    images = _get(resp, "data")
+    units = {"input_tokens": inp, "cached_input_tokens": cached, "image_output_tokens": out}
+    if isinstance(images, (list, tuple)) and images:
+        units["images"] = len(images)
+    return units
+
+
 def estimate_from_response(resp, region=None, provider=None, model=None):
-    """Estimate for one response object. The model comes from resp.model unless model= is passed."""
+    """Estimate for one response object. The model comes from resp.model unless model= is passed.
+
+    Image responses also pass the number of images in resp.data, and transcription responses billed by duration are
+    charged on usage.seconds."""
+    seconds = _get(_get(resp, "usage"), "seconds")
+    if seconds is not None:
+        model = model or _get(resp, "model")
+        if not model:
+            raise SaefError("response has no model, pass model=")
+        return estimate(model=model, region=region or default_region(), provider=provider, usage={"audio_seconds": seconds})
     m, inp, cached, out = usage_from_response(resp)
     model = model or m
     if not model:
         raise SaefError("response has no model, pass model=")
+    units = _billed_units(resp, model, inp, cached, out)
+    if units:
+        return estimate(model=model, region=region or default_region(), provider=provider, usage=units)
     return estimate(
         model=model, region=region or default_region(), provider=provider,
         input_tokens=inp, cached_input_tokens=cached, output_tokens=out,

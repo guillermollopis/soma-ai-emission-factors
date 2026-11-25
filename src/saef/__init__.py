@@ -2,16 +2,19 @@
 from ._core import (
     DATASET_VERSION,
     Estimate,
+    ModalityEstimate,
     SaefError,
     citation,
     estimate,
+    estimate_modality,
     factor,
     grids,
     model_class_for,
+    model_type_for,
     regions,
 )
 
-__version__ = "3.7.0"
+__version__ = "3.8.0"
 
 
 def _get(rec, key):
@@ -67,13 +70,16 @@ def summarize(records):
 __all__ = [
     "DATASET_VERSION",
     "Estimate",
+    "ModalityEstimate",
     "SaefError",
     "__version__",
     "citation",
     "estimate",
+    "estimate_modality",
     "factor",
     "grids",
     "model_class_for",
+    "model_type_for",
     "regions",
     "summarize",
 ]
