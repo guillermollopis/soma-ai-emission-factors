@@ -23,7 +23,7 @@ const e = estimate({ model: "gpt-4o-mini", inputTokens: 1200, outputTokens: 300,
 console.log(e.kgCo2e, e.kgCo2eHighCase); // central and conservative high case, kg CO2e
 console.log(e.kwh);                      // facility energy, kWh
 console.log(e.litres);                   // water in litres, or null where the region has no water factor
-console.log(e.modelClass, e.region, e.factorVersion); // "A" "eu-west-1" "3.3.0"
+console.log(e.modelClass, e.region, e.factorVersion); // "A" "eu-west-1" "3.4.0"
 
 estimate({ model: "gpt-4o", tokens: 1_000_000, region: "eu-west-1" }); // a billed total with no split
 console.log(factor("B", "eu-west-1").kgCo2ePer1mBilledTokens);
@@ -62,7 +62,7 @@ console.log(t.calls, t.kgCo2e, t.kgCo2eHighCase, t.kwh, t.litres, t.byModel);
 tracker.reset();
 ```
 
-Models the dataset treats as out of scope, such as embeddings, are skipped and counted in `totals().skippedCalls`. A per-call region that SAEF does not know falls back to the tracker's region.
+Non-text models, such as embeddings, images and audio, are skipped and counted in `totals().skippedCalls`. A per-call region that SAEF does not know falls back to the tracker's region.
 
 ## Vercel AI SDK
 
@@ -108,7 +108,7 @@ The factors follow the v3 lifecycle boundary. An estimate has four terms: electr
 
 These figures are modelled estimates built from published benchmarks, grid averages and lifecycle studies. They are not measurements of any provider's infrastructure. The tables carry six significant figures as arithmetic, but the inputs support about two. Report the central value with the high case, and read the methodology before quoting them.
 
-This package bundles the SAEF v3.3.0 tables (same values as v3.2.0, licence change only; dataset date 2026-10-02 for the values) and covers the H100 central case. Reserved accelerator-hour factors, the B200 sensitivity and the Tier 2b seat-based estimates in the full deposit are not exposed by this API.
+This package bundles the text tables of SAEF v3.4.0 (values dated 2026-10-02, identical to v3.3.0). The non-text model types of v3.4.0 are recognised but not estimated here, use the Python package for them. It covers the H100 central case. Reserved accelerator-hour factors, the B200 sensitivity and the Tier 2b seat-based estimates in the full deposit are not exposed by this API.
 
 ## EcoLogits and saef
 

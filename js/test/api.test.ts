@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { mapModel } from "../src/calc.js";
 import { SaefError, Tracker, estimate, estimateFromResponse, usageFromResponse } from "../src/index.js";
 
 describe("api", () => {
@@ -44,5 +45,19 @@ describe("api", () => {
     expect(tot.kgCo2e).toBeGreaterThan((a as { kgCo2e: number }).kgCo2e);
     t.reset();
     expect(t.totals().calls).toBe(0);
+  });
+});
+
+describe("model mapping", () => {
+  it("non-text and out-of-scope rows win over longer text prefixes, camelCase ids are split", () => {
+    expect(mapModel("gpt-4o-mini-transcribe-2025-12-15").modelType).toBe("speech_to_text");
+    expect(mapModel("gpt-4o-mini-tts").outOfScope).toBe(true);
+    expect(mapModel("TitanEmbeddingV2-Text").modelType).toBe("embedding_text");
+    expect(mapModel("TitanEmbeddingsG1-Image").modelClass).toBe("E-large");
+    expect(mapModel("advanced-voice-4o").outOfScope).toBe(true);
+    expect(mapModel("DeepSeekV3").modelClass).toBe("C");
+    expect(mapModel("img-1p-p-ev3").isDefaultFallback).toBe(true);
+    expect(() => estimate({ model: "gpt-image-2", outputTokens: 10 })).toThrow(/Python package/);
+    expect(() => estimate({ model: "gpt-4o-mini-tts", outputTokens: 10 })).toThrow(/out of scope/);
   });
 });

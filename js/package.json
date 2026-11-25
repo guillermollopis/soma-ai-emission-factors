@@ -1,6 +1,6 @@
 {
   "name": "saef",
-  "version": "3.7.0",
+  "version": "3.8.0",
   "description": "Estimate the carbon, energy and water of LLM API calls (OpenAI, Anthropic, Vercel AI SDK) from token usage, with per-token emission factors by model class and cloud region (SAEF, non-commercial licence)",
   "license": "SEE LICENSE IN LICENSE",
   "author": "Guillermo Llopis-Garcia <guillermollopis@somaai.earth>",

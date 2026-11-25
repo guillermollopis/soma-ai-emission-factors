@@ -51,7 +51,16 @@ const pyRepr = (s: unknown): string => {
 const constants = new Map(D.constants.map((r) => [r.constant, r]));
 const constant = (name: string): number => parseFloat(constants.get(name)!.central);
 
+const CAMEL_BOUNDARY = /(?<=[a-z0-9])(?=[A-Z])/g;
+
 export function normaliseIdentifier(identifier: string): string[] {
+  const trimmed = String(identifier).trim();
+  const spaced = trimmed.replace(CAMEL_BOUNDARY, "-");
+  if (spaced !== trimmed) return [...new Set([...normaliseLower(trimmed), ...normaliseLower(spaced)])];
+  return normaliseLower(trimmed);
+}
+
+function normaliseLower(identifier: string): string[] {
   const s = String(identifier).trim().toLowerCase();
   const cands = [s];
   let body = s;
@@ -81,11 +90,11 @@ export function normaliseIdentifier(identifier: string): string[] {
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-type Key = [number, number, number, string];
+type Key = [number, number, number, number, string];
 type Pattern = { key: Key; rx: RegExp; row: Row };
 const cmpKey = (a: Key, b: Key): number => {
-  for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return (a[i] as number) - (b[i] as number);
-  return a[3] < b[3] ? -1 : a[3] > b[3] ? 1 : 0;
+  for (let i = 0; i < 4; i++) if (a[i] !== b[i]) return (a[i] as number) - (b[i] as number);
+  return a[4] < b[4] ? -1 : a[4] > b[4] ? 1 : 0;
 };
 
 let patternsCache: Pattern[] | null = null;
@@ -98,7 +107,7 @@ function patterns(): Pattern[] {
       if (!alt) continue;
       const litPrefix = alt.split("*", 1)[0];
       const rx = new RegExp("^(?:" + alt.split("*").map(escapeRe).join(".*") + ")", "s");
-      out.push({ key: [litPrefix.length, alt.split("*").join("").length, alt.length, alt], rx, row });
+      out.push({ key: [row.model_type !== "text" ? 1 : 0, litPrefix.length, alt.split("*").join("").length, alt.length, alt], rx, row });
     }
   }
   out.sort((a, b) => cmpKey(b.key, a.key));
@@ -127,6 +136,8 @@ export interface ModelMapping {
   pattern: string;
   basis: string;
   modelClass: string | null;
+  /** "text", "out-of-scope", or a non-text model type such as "embedding_text". */
+  modelType: string;
   ownFactorModelId: string | null;
   outOfScope: boolean;
   isDefaultFallback: boolean;
@@ -143,6 +154,7 @@ export function mapModel(identifier: string): ModelMapping {
     pattern: hit.pattern,
     basis: hit.basis,
     modelClass: hit.model_class,
+    modelType: hit.model_type,
     ownFactorModelId: hit.own_factor_model_id || null,
     outOfScope: hit.model_class === "out-of-scope",
     isDefaultFallback: hit.basis === "default",
@@ -154,6 +166,12 @@ export function mapModel(identifier: string): ModelMapping {
   if (out.outOfScope) {
     out.modelClass = null;
     warnings.push(`${pyRepr(identifier)} matches the out-of-scope pattern ${pyRepr(hit.pattern)}: ${hit.notes}`);
+  } else if (hit.model_type !== "text") {
+    warnings.push(
+      `${pyRepr(identifier)} is mapped to model type ${hit.model_type}, class ${hit.model_class}: an assignment by ` +
+        `size, price tier or lineage, not a provider disclosure (${hit.size_or_tier_note})`,
+    );
+    return out;
   } else if (hit.basis === "tier") {
     warnings.push(
       `class proxy for a closed model: ${pyRepr(identifier)} was placed in Class ${hit.model_class} by the ` +
@@ -371,7 +389,13 @@ export function emissions(a: EmissionsInput): Emissions {
     warnings.push(...mm.warnings);
     if (mm.outOfScope) {
       throw new SaefError(
-        `${pyRepr(a.model)} is out of scope (embeddings, image, audio, video or moderation): no estimate. ${mm.warnings[mm.warnings.length - 1]}`,
+        `${pyRepr(a.model)} is out of scope (no model type covers it): no estimate. ${mm.warnings[mm.warnings.length - 1]}`,
+      );
+    }
+    if (mm.modelType !== "text") {
+      throw new SaefError(
+        `${pyRepr(a.model)} has model type ${mm.modelType}, class ${mm.modelClass}: this package estimates text models only, ` +
+          `use estimate_modality in the Python package`,
       );
     }
     cl = mm.modelClass as string;

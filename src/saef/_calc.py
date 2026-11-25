@@ -281,7 +281,7 @@ def emissions(model=None, model_class=None, provider=None, region=None, billed_t
         warnings += mm["warnings"]
         p += mm["provenance"]
         if mm["out_of_scope"]:
-            raise SaefError(f"{model!r} is out of scope (embeddings, image, audio, video or moderation): no estimate. {mm['warnings'][-1]}")
+            raise SaefError(f"{model!r} is out of scope (no model type covers it): no estimate. {mm['warnings'][-1]}")
         if mm["model_type"] != "text":
             raise SaefError(f"{model!r} has model type {mm['model_type']}, use estimate_modality or estimate(usage=...)")
         cl, own, basis = mm["model_class"], mm["own_factor_model_id"], mm["basis"]

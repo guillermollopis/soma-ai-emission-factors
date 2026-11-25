@@ -14,12 +14,13 @@ from saef.integrations.openai import estimate_from_response
 out_path = Path(__file__).resolve().parent.parent / "test" / "parity.json"
 
 measured = sorted({r["model_id"] for r in _calc.read("model_factors.csv")})[:6]
+mapping_fix = ["gpt-4o-mini-transcribe-2025-12-15", "gpt-4o-mini-tts", "TitanEmbeddingV2-Text", "advanced-voice-4o", "DeepSeekV3"]
 models = [
     "gpt-4o", "gpt-4o-mini", "gpt-4.1-nano", "gpt-5", "gpt-5-mini", "o3", "claude-sonnet-4-5", "claude-haiku-4-5",
     "claude-opus-4-1", "gemini-2.5-pro", "gemini-2.5-flash", "mistral-large-latest", "llama-3.1-70b-instruct",
     "us.anthropic.claude-sonnet-4-5-20250929-v1:0", "openai/gpt-4o", "azureml://registries/azure-openai/models/gpt-4o/versions/2",
     "totally-unknown-model-xyz", "text-embedding-3-small", "dall-e-3",
-] + measured
+] + mapping_fix + measured
 regions = [None, "us-east-1", "eu-north-1", "eu-west-1", "global-average", "eu-27", "swedencentral", "FRA", "DEU", "us-west-2", "ap-southeast-2", "nope-region-9"]
 splits = [
     dict(input_tokens=1000, output_tokens=500, cached_input_tokens=0),
@@ -28,13 +29,22 @@ splits = [
     dict(input_tokens=2_500_000, output_tokens=400_000, cached_input_tokens=1_000_000),
 ]
 
+
+
+def text_estimate(model, **kw):
+    """The TypeScript package covers text models only."""
+    if saef.model_type_for(model)[0] != "text":
+        raise saef.SaefError("not a text model")
+    return saef.estimate(model=model, **kw)
+
+
 cases = []
 for m in models:
     for rg in regions:
         for sp in splits:
             c = dict(kind="split", model=m, region=rg, **sp)
             try:
-                e = saef.estimate(model=m, region=rg, **sp)
+                e = text_estimate(model=m, region=rg, **sp)
                 c["expected"] = dict(
                     kg_co2e=e.kg_co2e, kg_co2e_high_case=e.kg_co2e_high_case,
                     development_line_kg_co2e=e.development_line_kg_co2e, terms=e.terms_kg_co2e,
@@ -49,7 +59,7 @@ for m in models:
         for toks in (1_000_000, 12345):
             c = dict(kind="billed", model=m, region=rg, tokens=toks)
             try:
-                e = saef.estimate(model=m, region=rg, tokens=toks)
+                e = text_estimate(model=m, region=rg, tokens=toks)
                 c["expected"] = dict(
                     kg_co2e=e.kg_co2e, kg_co2e_high_case=e.kg_co2e_high_case, water_ml=e.water_ml,
                     model_class=e.model_class, region_id=e.region_id, effective=e.effective_tokens, billed=e.billed_tokens,
@@ -79,7 +89,7 @@ for name, resp in shapes.items():
             kg_co2e=e.kg_co2e, kg_co2e_high_case=e.kg_co2e_high_case, water_ml=e.water_ml,
             model_class=e.model_class, region_id=e.region_id, billed=e.billed_tokens, effective=e.effective_tokens)))
 
-classmap = {m: (saef.model_class_for(m) if m not in ("text-embedding-3-small", "dall-e-3") else None) for m in models}
+classmap = {m: (saef.model_class_for(m) if saef.model_type_for(m)[0] == "text" else None) for m in models}
 out = dict(
     version=saef.__version__, dataset_version=saef.DATASET_VERSION, cases=cases, factors=classes, responses=resp_cases,
     model_class=classmap, regions=saef.regions(), grids=saef.grids(), citation=saef.citation(),
