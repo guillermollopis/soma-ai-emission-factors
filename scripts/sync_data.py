@@ -15,6 +15,8 @@ FILES = [
     "factors_v3_lifecycle.csv",
     "reserved_capacity_factors.csv",
     "region_water_factors.csv",
+    "modality_factors.csv",
+    "modality_sources.csv",
 ]
 
 DEST.mkdir(parents=True, exist_ok=True)

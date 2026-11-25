@@ -103,7 +103,7 @@ def _patterns():
             alt = alt.strip().lower()
             if alt:
                 rx = re.compile("".join(".*" if p == "*" else re.escape(p) for p in re.split(r"(\*)", alt)))
-                out.append(((r["model_class"] == "out-of-scope", _rank(alt)), rx, r))
+                out.append(((r["model_type"] != "text", _rank(alt)), rx, r))
     out.sort(key=lambda x: x[0], reverse=True)
     return out
 
@@ -130,13 +130,19 @@ def map_model(identifier):
     out = dict(
         identifier=str(identifier), pattern=hit["pattern"], basis=hit["basis"], model_class=hit["model_class"],
         own_factor_model_id=hit["own_factor_model_id"] or None, out_of_scope=hit["model_class"] == "out-of-scope",
-        is_default_fallback=hit["basis"] == "default", warnings=warnings, provenance=p,
+        is_default_fallback=hit["basis"] == "default", model_type=hit["model_type"], warnings=warnings, provenance=p,
     )
     if out["is_default_fallback"]:
         warnings.append(f"unmapped model identifier {identifier!r}: defaulted to Class {hit['model_class']} and flagged")
     if out["out_of_scope"]:
         out["model_class"] = None
         warnings.append(f"{identifier!r} matches the out-of-scope pattern {hit['pattern']!r}: {hit['notes']}")
+    elif hit["model_type"] != "text":
+        warnings.append(
+            f"{identifier!r} is mapped to model type {hit['model_type']}, class {hit['model_class']}: an assignment by "
+            f"size, price tier or lineage, not a provider disclosure ({hit['size_or_tier_note']})"
+        )
+        return out
     elif hit["basis"] == "tier":
         warnings.append(
             f"class proxy for a closed model: {identifier!r} was placed in Class {hit['model_class']} by the "
@@ -276,6 +282,8 @@ def emissions(model=None, model_class=None, provider=None, region=None, billed_t
         p += mm["provenance"]
         if mm["out_of_scope"]:
             raise SaefError(f"{model!r} is out of scope (embeddings, image, audio, video or moderation): no estimate. {mm['warnings'][-1]}")
+        if mm["model_type"] != "text":
+            raise SaefError(f"{model!r} has model type {mm['model_type']}, use estimate_modality or estimate(usage=...)")
         cl, own, basis = mm["model_class"], mm["own_factor_model_id"], mm["basis"]
         matched = mm["pattern"]
     else:
@@ -322,6 +330,19 @@ def emissions(model=None, model_class=None, provider=None, region=None, billed_t
 
 def water(t_eff, model_class, provider=None, region=None):
     """Water for an effective-token count under both hydropower conventions, or available=False."""
+    def energy(rid, p):
+        fl = next((r for r in read("factors_v3_lifecycle.csv") if r["model_class"] == model_class and r["gpu"] == "H100" and r["region_id"] == rid), None)
+        if fl is None:
+            raise SaefError(f"no factors_v3_lifecycle.csv row for class {model_class} / H100 / {rid}")
+        prov(p, "facility Wh per 1,000 effective tokens", fl, "facility_wh_per_1k_effective_tokens")
+        prov(p, "server Wh per 1,000 effective tokens", fl, "server_wh_per_1k_effective_tokens")
+        return float(fl["server_wh_per_1k_effective_tokens"]), float(fl["facility_wh_per_1k_effective_tokens"])
+
+    return water_for_energy(energy, t_eff / 1000.0, provider, region)
+
+
+def water_for_energy(energy, k, provider=None, region=None):
+    """Water in mL for k times the (server Wh, facility Wh) that energy(region_id, provenance) returns."""
     warnings, p = [], []
     reg = resolve_region(provider, region)
     warnings += reg["warnings"]
@@ -334,13 +355,7 @@ def water(t_eff, model_class, provider=None, region=None):
         )
         return dict(available=False, region_id=rid, warnings=warnings, provenance=p)
     w = wf[rid]
-    fl = next((r for r in read("factors_v3_lifecycle.csv") if r["model_class"] == model_class and r["gpu"] == "H100" and r["region_id"] == rid), None)
-    if fl is None:
-        raise SaefError(f"no factors_v3_lifecycle.csv row for class {model_class} / H100 / {rid}")
-    fac, srv = float(fl["facility_wh_per_1k_effective_tokens"]), float(fl["server_wh_per_1k_effective_tokens"])
-    prov(p, "facility Wh per 1,000 effective tokens", fl, "facility_wh_per_1k_effective_tokens")
-    prov(p, "server Wh per 1,000 effective tokens", fl, "server_wh_per_1k_effective_tokens")
-    k = t_eff / 1000.0
+    srv, fac = energy(rid, p)
     base = srv if w["wue_denominator"].startswith("IT load") else fac
     onsite = base * float(w["wue_l_per_kwh"])
     if w["wue_basis_as_published"] == "withdrawal":
