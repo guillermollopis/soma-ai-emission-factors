@@ -3,13 +3,14 @@
 Every value is stored at GPU (accelerator) level and then goes through the text chain unchanged:
     server = GPU x H x I, facility = server x PUE, CO2e = facility x grid + lifecycle per server kWh, water as for text.
 Inputs are written out with their source ids (modality_sources.csv). Standard library only.
-Run: python -I scripts/build_modality_factors.py
+Run: python -I build_modality_factors.py
 """
 import csv
 import math
 import pathlib
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+HERE = pathlib.Path(__file__).resolve().parent
+ROOT = HERE if (HERE / "factors_v3_lifecycle.csv").exists() else HERE.parent
 
 
 def read(name):
