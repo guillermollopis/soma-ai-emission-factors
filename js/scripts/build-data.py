@@ -35,6 +35,11 @@ for c in "abc":
         f"class_{c}_factor_kg_per_m_billed_tokens_default_mix",
     ]
 
+modality_cols = ["model_type", "class", "functional_unit", "basis", "source_ids"]
+for q in ("gpu_wh", "server_wh", "facility_wh", "embodied_g_co2e", "construction_g_co2e"):
+    modality_cols += [f"{q}_{k}" for k in ("central", "low", "high")]
+modality_cols += ["facility_wh_high_case", "embodied_g_co2e_high_case", "construction_g_co2e_high_case"]
+
 version = "3.5.0"
 init = (src / "_core.py").read_text(encoding="utf-8")
 assert f'DATASET_VERSION = "{version}"' in init
@@ -50,6 +55,7 @@ out = {
         rows("model_class_mapping.csv"),
         ["pattern", "provider", "model_class", "basis", "size_or_tier_note", "own_factor_model_id", "notes", "model_type", "match_rule"],
     ),
+    "modalityFactors": pick(rows("modality_factors.csv"), modality_cols),
     "modelFactors": pick(
         rows("model_factors.csv"),
         [

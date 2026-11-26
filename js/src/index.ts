@@ -11,6 +11,10 @@ import {
   mapModel,
   water,
 } from "./calc.js";
+import { estimateModality, estimateModalityUsage } from "./modality.js";
+
+export { estimateModality, estimateModalityUsage };
+export type { ModalityEstimate, ModalityOptions, ModalityUsage } from "./modality.js";
 
 export { SaefError, DATASET_VERSION, DATASET_DOI, DATASET_VERSION_DOI, PAPER_DOI };
 
@@ -336,8 +340,8 @@ export const grids = listGrids;
 /** Class (A, B or C) of a model identifier. Unmapped identifiers get the conservative class C. Throws for out-of-scope and non-text models. */
 export function modelClassFor(model: string): string {
   const m = mapModel(model);
-  if (m.outOfScope) throw new SaefError(`'${model}' is out of scope (text-to-speech, realtime voice, video and other types with no factor yet)`);
-  if (m.modelType !== "text") throw new SaefError(`'${model}' has no text class: model type ${m.modelType}, class ${m.modelClass}`);
+  if (m.outOfScope) throw new SaefError(`'${model}' is out of scope (a type with no factor yet)`);
+  if (m.modelType !== "text") throw new SaefError(`'${model}' has no text class: model type ${m.modelType}, class ${m.modelClass}. Use estimateModality`);
   return m.modelClass as string;
 }
 
