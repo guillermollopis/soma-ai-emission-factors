@@ -45,10 +45,13 @@ for c, v in CLASS_GPU.items():
     assert abs(v - float(LIFE[c, "eu-west-1"]["gpu_wh_per_1k_effective_tokens"])) < 6e-6
 
 rows = []
+VIDEO_INDICATIVE = "Indicative: the serving factor and resolution multipliers are assumptions, ranges above 720p are wide. "
 
 
 def add(model_type, cls, unit, central, low, high, basis, sources, notes):
     assert low <= central <= high, (model_type, cls, unit, low, central, high)
+    if model_type == "video_generation":
+        notes = VIDEO_INDICATIVE + notes
     rows.append((model_type, cls, unit, central, low, high, basis, sources, notes))
 
 

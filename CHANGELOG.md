@@ -3,8 +3,10 @@
 ## 3.9.0 (dataset SAEF v3.5.0, release date to be set)
 
 - New model types. `modality_factors.csv` grows to 101 rows with text-to-speech, realtime voice (turn-based with a token path and a per-minute fallback, and full-duplex per active minute) and video per second with resolution tiers. Same chain, lifecycle rule and training exclusion as 3.8.0.
-- `model_class_mapping.csv` has a new column `match_rule`. A row marked `billing-unit-only` applies only when the usage unit belongs to its model type, so `gemini-omni-flash` is video when billed in seconds and text class B when billed in tokens. 287 rows.
+- `model_class_mapping.csv` has a new column `match_rule`. A row marked `billing-unit-only` applies only when the usage unit belongs to its model type, so `gemini-omni-flash` is video when billed in seconds and text class B when billed in tokens. 288 rows.
 - New units: `characters`, `audio_output_tokens`, `user_audio_minutes`, `assistant_audio_minutes`, `context_minutes`, `conversation_minutes`, `active_session_minutes`, `video_seconds` (and `_480p`, `_720p`, `_1080p`, `_2160p`), `video_clips`.
+- Video values are labelled indicative. Every video row carries the label in `notes`, and `estimate_modality` adds it to `warnings`, because the serving factor and resolution multipliers are assumptions and commercial models are classed by price tier only.
+- Veo 2 (USD 0.50 per second) is class V-C. Veo prices, Titan embedding prices and Cohere Rerank 5 prices were rechecked on the providers' pages on 2026-11-26.
 - No text row, text factor or 3.8.0 modality value changed.
 
 ## 3.8.0 (dataset SAEF v3.4.0, release date to be set)

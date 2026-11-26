@@ -170,6 +170,8 @@ def test_img_1p_stays_unmapped_and_flagged():
         ("sora-2", "video_generation", "V-A"),
         ("veo-3.1-fast-generate-001", "video_generation", "V-A"),
         ("veo-3.1-generate-001", "video_generation", "V-B"),
+        ("veo-2.0-generate-001", "video_generation", "V-C"),
+        ("rerank-v5-pro", "rerank", "R-small"),
         ("sora-2-pro", "video_generation", "V-C"),
         ("kling-v2.1-pro", "video_generation", "V-B"),
         ("kling-v2-master", "video_generation", "V-C"),
@@ -231,6 +233,12 @@ def test_eight_second_class_b_720p_clip_is_hundreds_of_wh():
     assert saef.estimate_modality("veo-3.1-generate-001", 1, "video_clips", "us-east-1").energy_wh == pytest.approx(e.energy_wh, rel=1e-4)
     hd = saef.estimate_modality("veo-3.1-generate-001", 8, "video_seconds_1080p", "us-east-1")
     assert hd.energy_wh == pytest.approx(2.25 * e.energy_wh, rel=1e-4)
+    assert any("indicative" in w for w in e.warnings)
+
+
+def test_veo_2_is_class_c_and_text_results_carry_no_video_label():
+    assert saef.model_type_for("veo-2.0-generate-001") == ("video_generation", "V-C")
+    assert not any("indicative" in w for w in saef.estimate_modality("rerank-v3.5", 10, "search_units").warnings)
 
 
 def test_gemini_omni_routes_by_billing_unit():

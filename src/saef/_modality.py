@@ -40,6 +40,10 @@ UNITS = {
     "video_clips": ("video_clip", 1.0),
 }
 VIDEO_UNITS = tuple(u for u in UNITS if u.startswith("video_"))
+VIDEO_INDICATIVE = (
+    "video values are indicative: the serving factor (0.5, range 0.2 to 1.0) and the resolution multipliers are "
+    "assumptions, commercial models are classed by price tier only, and ranges above 720p span 50 to 80 times"
+)
 VOICE_MINUTES = ("user_audio_minutes", "assistant_audio_minutes", "context_minutes", "conversation_minutes")
 ALIASES = {
     "embedding_tokens": "input_tokens", "tokens_scored": "input_tokens",
@@ -236,6 +240,8 @@ def estimate(model=None, usage=None, region=None, provider=None, megapixels=None
             warnings.append("megapixels applies to per-image diffusion models only and was ignored")
         components.append(_component(row, unit, count, n, p))
 
+    if any(c["model_type"] == "video_generation" for c in components):
+        warnings.append(VIDEO_INDICATIVE)
     tot = lambda key: sum(c[key] for c in components)
     server, fac = tot("server_wh_central"), tot("facility_wh_central")
     grid = reg["grid_kg_co2e_per_kwh"]
