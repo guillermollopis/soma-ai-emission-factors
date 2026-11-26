@@ -15,6 +15,7 @@ const D = raw as unknown as {
   paperDoi: string;
   constants: Row[];
   modelClassMapping: Row[];
+  modalityFactors: Row[];
   modelFactors: Row[];
   cloudRegions: Row[];
   grids: Row[];
@@ -22,6 +23,8 @@ const D = raw as unknown as {
   waterFactors: Row[];
   lifecycle: Row[];
 };
+
+export const modalityFactorRows = (): Row[] => D.modalityFactors;
 
 export const DATASET_VERSION = D.datasetVersion;
 export const DATASET_DOI = D.datasetDoi;
@@ -42,7 +45,8 @@ const DOT_VENDOR = new Set([
 const UNKNOWN_REGION = new Set(["", "unknown", "global", "global-average", "world", "any", "none", "mixed", "multi-region"]);
 const EU27_REGION = new Set(["eu-27", "eu27", "eu", "eu-only", "eu data zone", "european union"]);
 
-const pyRepr = (s: unknown): string => {
+export const pyRepr = (s: unknown): string => {
+  if (s === null || s === undefined) return "None";
   const t = String(s);
   const q = t.includes("'") && !t.includes('"') ? '"' : "'";
   return q + t.split("\\").join("\\\\").split(q).join("\\" + q) + q;
@@ -395,7 +399,7 @@ export function emissions(a: EmissionsInput): Emissions {
     if (mm.modelType !== "text") {
       throw new SaefError(
         `${pyRepr(a.model)} has model type ${mm.modelType}, class ${mm.modelClass}: this package estimates text models only, ` +
-          `use estimate_modality in the Python package`,
+          `use estimateModality`,
       );
     }
     cl = mm.modelClass as string;
@@ -476,7 +480,12 @@ export interface Water {
   warnings: string[];
 }
 
-export function water(tEff: number, modelClass: string, provider?: string | null, region?: string | null): Water {
+export function waterForEnergy(
+  energy: (regionId: string) => [number, number],
+  k: number,
+  provider?: string | null,
+  region?: string | null,
+): Water {
   const warnings: string[] = [];
   const reg = resolveRegion(provider, region);
   warnings.push(...reg.warnings);
@@ -490,11 +499,7 @@ export function water(tEff: number, modelClass: string, provider?: string | null
     return { available: false, regionId: rid, warnings };
   }
   const w = wf.get(rid)!;
-  const fl = D.lifecycle.find((r) => r.model_class === modelClass && r.gpu === "H100" && r.region_id === rid);
-  if (!fl) throw new SaefError(`no factors_v3_lifecycle.csv row for class ${modelClass} / H100 / ${rid}`);
-  const fac = parseFloat(fl.facility_wh_per_1k_effective_tokens);
-  const srv = parseFloat(fl.server_wh_per_1k_effective_tokens);
-  const k = tEff / 1000;
+  const [srv, fac] = energy(rid);
   const base = w.wue_denominator.startsWith("IT load") ? srv : fac;
   let onsite = base * parseFloat(w.wue_l_per_kwh);
   if (w.wue_basis_as_published === "withdrawal") onsite *= parseFloat(w.withdrawal_to_consumption);
@@ -522,6 +527,19 @@ export function water(tEff: number, modelClass: string, provider?: string | null
     );
   }
   return out;
+}
+
+export function water(tEff: number, modelClass: string, provider?: string | null, region?: string | null): Water {
+  return waterForEnergy(
+    (rid) => {
+      const fl = D.lifecycle.find((r) => r.model_class === modelClass && r.gpu === "H100" && r.region_id === rid);
+      if (!fl) throw new SaefError(`no factors_v3_lifecycle.csv row for class ${modelClass} / H100 / ${rid}`);
+      return [parseFloat(fl.server_wh_per_1k_effective_tokens), parseFloat(fl.facility_wh_per_1k_effective_tokens)];
+    },
+    tEff / 1000,
+    provider,
+    region,
+  );
 }
 
 export const listRegions = (provider?: string): string[] =>

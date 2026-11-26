@@ -57,7 +57,7 @@ describe("model mapping", () => {
     expect(mapModel("advanced-voice-4o").outOfScope).toBe(true);
     expect(mapModel("DeepSeekV3").modelClass).toBe("C");
     expect(mapModel("img-1p-p-ev3").isDefaultFallback).toBe(true);
-    expect(() => estimate({ model: "gpt-image-2", outputTokens: 10 })).toThrow(/Python package/);
+    expect(() => estimate({ model: "gpt-image-2", outputTokens: 10 })).toThrow(/estimateModality/);
     expect(() => estimate({ model: "gpt-4o-mini-tts", outputTokens: 10 })).toThrow(/out of scope/);
   });
 });

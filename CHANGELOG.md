@@ -2,9 +2,11 @@
 
 ## 3.8.0 (dataset SAEF v3.4.0, release date to be set)
 
+- Titan embedding prices and Cohere rerank prices (including Rerank 5, priced per 1M tokens) were rechecked on the providers' pages on 2026-11-26. No class changed.
 - New model types. `modality_factors.csv` (with `modality_sources.csv`) adds text and image embeddings, reranking, moderation, token-billed and per-image image generation, and transcription, per functional unit with low, central and high. Values are stored at GPU level and use the text chain unchanged. Construction and embodied are charged per server kWh at the class A ratio. Training is excluded for these types.
 - `model_class_mapping.csv` has a new column `model_type` (default `text`), and rows that were out of scope now point to a model type and class where one exists (254 rows). Text-to-speech, realtime voice and video stay out of scope. No text row and no text factor changed.
 - New `saef.estimate_modality(model, unit_count, unit, region)`, `saef.model_type_for(model)`, `ModalityEstimate`, CLI `saef modality` and MCP tool `estimate_modality`. `saef.estimate(usage={...})` routes a usage record by billing unit before name, and `saef.estimate(tokens=...)` on an embedding model now returns an estimate instead of an error. `estimate_from_response` reads image responses (with the image count) and transcription durations.
+- The JavaScript package gets `estimateModality` and `estimateModalityUsage` with the same factors, routing, warnings and errors as Python (`js/src/modality.ts`, held to the Python output by `js/test/modality-parity.test.ts`).
 - Behaviour change: the integrations now count embedding calls instead of skipping them.
 - Closed image models are never charged below open diffusion models. An image output token counts 1/D effective tokens, as a text output token does.
 - Out-of-scope rows now win whenever they match, instead of competing on literal prefix length. `gpt-4o-mini-transcribe-*` used to get Class A through `gpt-4o-mini`. Same fix for `gpt-4o-mini-audio-*`, `gpt-4o-mini-realtime-*`, `gpt-4o-mini-image`, `gemini-*-flash-live`, `gemini-*-flash-*-tts` and `gemini-*-transcribe`.

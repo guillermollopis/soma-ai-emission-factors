@@ -88,6 +88,19 @@ console.log(tracker.totals());
 
 The middleware wraps `doGenerate` and `doStream`. For streams the estimate is computed on the `finish` part. It never changes the result or throws into your call. A call that cannot be estimated, for example an embedding model, is reported to `onError` and skipped. It reads the usage of AI SDK language model specification V2, V3 and V4, including the older `promptTokens` and `completionTokens` names, and takes cache reads from `cachedInputTokens` (or `inputTokens.cacheRead`). Tested against `ai` 7.0.177.
 
+## Embeddings, images, reranking, moderation and transcription
+
+`estimateModality(unitCount, unit, model, { region, provider, megapixels })` estimates non-text usage by billing unit, with low, central and high values. `estimateModalityUsage({ input_tokens: 1200, images: 2 }, model, opts)` combines several units of one call. No training term is charged.
+
+```ts
+import { estimateModality } from "saef";
+
+const e = estimateModality(2_000_000, "input_tokens", "text-embedding-3-small", { region: "eu-west-1" });
+console.log(e.kgCo2e, e.kgCo2eLow, e.kgCo2eHigh, e.waterMl, e.modelType, e.warnings);
+```
+
+Units are `input_tokens`, `cached_input_tokens`, `text_output_tokens`, `image_output_tokens`, `images`, `images_1024_low|medium|high`, `images_4k`, `search_units`, `calls`, `audio_minutes` and `audio_seconds`. A unit that names a model type decides before the model name does, and the estimate says so in `warnings`.
+
 ## Regions
 
 `region` can be a cloud region id (AWS, Azure and Google Cloud, see `regions()`), an ISO-3 country code, a US eGRID subregion, `eu-27`, or omitted for the global average. A region that matches nothing throws `SaefError` with suggestions. The default comes from the `SAEF_REGION` environment variable in `estimateFromResponse`, `Tracker` and the middleware, then falls back to the global average. If you know where your provider serves your calls, pass it, because the grid mix changes the result a lot.
@@ -108,7 +121,7 @@ The factors follow the v3 lifecycle boundary. An estimate has four terms: electr
 
 These figures are modelled estimates built from published benchmarks, grid averages and lifecycle studies. They are not measurements of any provider's infrastructure. The tables carry six significant figures as arithmetic, but the inputs support about two. Report the central value with the high case, and read the methodology before quoting them.
 
-This package bundles the text tables of SAEF v3.4.0 (values dated 2026-10-02, identical to v3.3.0). The non-text model types of v3.4.0 are recognised but not estimated here, use the Python package for them. It covers the H100 central case. Reserved accelerator-hour factors, the B200 sensitivity and the Tier 2b seat-based estimates in the full deposit are not exposed by this API.
+This package bundles the text tables of SAEF v3.4.0 (values dated 2026-10-02, identical to v3.3.0). The non-text model types of v3.4.0 (embeddings, reranking, moderation, image generation, transcription) are estimated with `estimateModality`. It covers the H100 central case. Reserved accelerator-hour factors, the B200 sensitivity and the Tier 2b seat-based estimates in the full deposit are not exposed by this API.
 
 ## EcoLogits and saef
 
@@ -116,7 +129,7 @@ CodeCarbon reads the power of hardware you run, so it does not fit remote APIs. 
 
 ## Regenerating the data and parity tests
 
-The factor tables in `data/saef-data.json` are generated from the Python package's CSV files with `python scripts/build-data.py <path to saef/src/saef>`. The parity tests compare this package with the Python package on 1,800 model, region and token cases. Regenerate their expected values with `PYTHONPATH=<path to saef/src> python scripts/dump-parity.py`, then run `npm test`.
+The factor tables in `data/saef-data.json` are generated from the Python package's CSV files with `python scripts/build-data.py <path to saef/src/saef>`. The parity tests compare this package with the Python package on 1,800 model, region and token cases. Regenerate their expected values with `PYTHONPATH=<path to saef/src> python scripts/dump-parity.py`, then run `npm test`. The non-text cases come from `scripts/dump-modality-parity.py` the same way.
 
 ## Licence
 
