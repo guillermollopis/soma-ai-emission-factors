@@ -18,7 +18,7 @@ AI that runs on hardware you control can be metered, with a power meter or with 
 |---|---|---|
 | Training or inference on your own GPUs | CodeCarbon, Green Algorithms | Estimated energy and emissions of your own hardware |
 | API calls made from your code | `saef` (this package, LiteLLM, LangChain, LlamaIndex and Haystack integrations) or EcoLogits | Per-call estimates |
-| ChatGPT, Copilot or Claude seats across a company | SAEF factors applied to seats x messages, or the free [SOMA AI calculator](https://somaai.earth/ai-footprint/calculator) (also as a [Hugging Face Space](https://huggingface.co/spaces/GuillermoLlopis/saef-ai-footprint-estimator)) | An organisation-wide estimate for Scope 3 category 1 |
+| ChatGPT, Copilot or Claude seats across a company | SAEF factors applied to seats x messages, or the free [SOMA AI calculator](https://somaai.earth/ai-footprint/calculator) (also as a [Hugging Face Space](https://huggingface.co/spaces/soma-ai/saef-ai-footprint-estimator)) | An organisation-wide estimate for Scope 3 category 1 |
 | Cloud infrastructure you rent | Your cloud provider's carbon dashboard | Emissions of your cloud account |
 
 Full answer with a worked 250-seat Copilot example and published per-query figures: [How can I measure the environmental impact of the AI I use?](https://somaai.earth/ai-footprint/answers/how-to-measure-environmental-impact-of-ai-you-use) (Spanish: [¿Cómo puedo medir el impacto ambiental de la IA que uso?](https://somaai.earth/ai-footprint/respuestas/como-medir-impacto-ambiental-ia)). All SAEF figures are estimates, not measurements.
@@ -396,7 +396,7 @@ Pin a dataset in an inventory by the version DOI. The concept DOI always resolve
 ## Links
 
 - Kaggle notebook: https://www.kaggle.com/code/guillermollopis/estimate-the-carbon-footprint-of-your-llm-api-call
-- Hugging Face Space, try the estimator in the browser: https://huggingface.co/spaces/GuillermoLlopis/saef-ai-footprint-estimator
+- Hugging Face Space, try the estimator in the browser: https://huggingface.co/spaces/soma-ai/saef-ai-footprint-estimator
 
 - Zenodo (concept DOI, always latest version): https://doi.org/10.5281/zenodo.20443585
 - Zenodo v3.2.0 record: https://zenodo.org/records/24460344
