@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.8.0 (dataset SAEF v3.4.0, release date to be set)
+## 3.8.0 (dataset SAEF v3.4.0, 2026-11-27, DOI 10.5281/zenodo.24591290)
 
 - Titan embedding prices and Cohere rerank prices (including Rerank 5, priced per 1M tokens) were rechecked on the providers' pages on 2026-11-26. No class changed.
 - New model types. `modality_factors.csv` (with `modality_sources.csv`) adds text and image embeddings, reranking, moderation, token-billed and per-image image generation, and transcription, per functional unit with low, central and high. Values are stored at GPU level and use the text chain unchanged. Construction and embodied are charged per server kWh at the class A ratio. Training is excluded for these types.
