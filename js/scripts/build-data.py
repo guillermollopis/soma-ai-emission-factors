@@ -47,8 +47,7 @@ assert f'DATASET_VERSION = "{version}"' in init
 out = {
     "datasetVersion": version,
     "datasetDoi": "10.5281/zenodo.20443585",
-    # TODO on publish: the v3.5.0 version DOI
-    "datasetVersionDoi": "10.5281/zenodo.24460344",
+    "datasetVersionDoi": "10.5281/zenodo.24596349",
     "paperDoi": "10.1016/j.spc.2026.11.003",
     "constants": pick(rows("token_basis_constants.csv"), ["constant", "central"]),
     "modelClassMapping": pick(
