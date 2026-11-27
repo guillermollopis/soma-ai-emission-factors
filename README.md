@@ -4,6 +4,7 @@
 [![Paper DOI](https://img.shields.io/badge/DOI-10.1016/j.spc.2026.11.003-blue.svg)](https://doi.org/10.1016/j.spc.2026.11.003)
 [![arXiv](https://img.shields.io/badge/arXiv-2606.10660-b31b1b.svg)](https://arxiv.org/abs/2606.10660)
 [![License: Non-Commercial](https://img.shields.io/badge/License-Non--Commercial-lightgrey.svg)](https://somaai.earth/licensing)
+[![SAEF MCP server on Glama](https://glama.ai/mcp/servers/guillermollopis/soma-ai-emission-factors/badges/score.svg)](https://glama.ai/mcp/servers/guillermollopis/soma-ai-emission-factors)
 
 SOMA AI Emission Factors (SAEF) is a versioned dataset of estimated carbon and water factors for AI inference, by model class and by region, built for Scope 3 Category 1 reporting under the GHG Protocol and CSRD. It covers 210 countries and economies, 27 US eGRID subregions and 143 AWS, Azure and Google Cloud regions. Every factor traces to a file and a source, and the calculator returns the file, line and column behind each number. Published by [SOMA AI](https://somaai.earth), Barcelona, under a non-commercial licence, see the Licence section. The method is published in Sustainable Production and Consumption 70 (2026) 320-347, https://doi.org/10.1016/j.spc.2026.11.003 (free preprint arXiv 2606.10660).
 
@@ -17,7 +18,7 @@ AI that runs on hardware you control can be metered, with a power meter or with 
 |---|---|---|
 | Training or inference on your own GPUs | CodeCarbon, Green Algorithms | Estimated energy and emissions of your own hardware |
 | API calls made from your code | `saef` (this package, LiteLLM, LangChain, LlamaIndex and Haystack integrations) or EcoLogits | Per-call estimates |
-| ChatGPT, Copilot or Claude seats across a company | SAEF factors applied to seats x messages, or the free [SOMA AI calculator](https://somaai.earth/ai-footprint/calculator) (also as a [Hugging Face Space](https://huggingface.co/spaces/GuillermoLlopis/saef-ai-footprint-estimator)) | An organisation-wide estimate for Scope 3 category 1 |
+| ChatGPT, Copilot or Claude seats across a company | SAEF factors applied to seats x messages, or the free [SOMA AI calculator](https://somaai.earth/ai-footprint/calculator) (also as a [Hugging Face Space](https://huggingface.co/spaces/soma-ai/saef-ai-footprint-estimator)) | An organisation-wide estimate for Scope 3 category 1 |
 | Cloud infrastructure you rent | Your cloud provider's carbon dashboard | Emissions of your cloud account |
 
 Full answer with a worked 250-seat Copilot example and published per-query figures: [How can I measure the environmental impact of the AI I use?](https://somaai.earth/ai-footprint/answers/how-to-measure-environmental-impact-of-ai-you-use) (Spanish: [¿Cómo puedo medir el impacto ambiental de la IA que uso?](https://somaai.earth/ai-footprint/respuestas/como-medir-impacto-ambiental-ia)). All SAEF figures are estimates, not measurements.
@@ -469,7 +470,7 @@ Pin a dataset in an inventory by the version DOI. The concept DOI always resolve
 ## Links
 
 - Kaggle notebook: https://www.kaggle.com/code/guillermollopis/estimate-the-carbon-footprint-of-your-llm-api-call
-- Hugging Face Space, try the estimator in the browser: https://huggingface.co/spaces/GuillermoLlopis/saef-ai-footprint-estimator
+- Hugging Face Space, try the estimator in the browser: https://huggingface.co/spaces/soma-ai/saef-ai-footprint-estimator
 
 - Zenodo (concept DOI, always latest version): https://doi.org/10.5281/zenodo.20443585
 - Zenodo v3.2.0 record: https://zenodo.org/records/24460344
@@ -495,4 +496,4 @@ Pin a dataset in an inventory by the version DOI. The concept DOI always resolve
 
 ## License
 
-The data (v3.3.0 onward) is licensed under the SOMA AI Emission Factors Data Licence 1.0 (Non-Commercial), see [LICENSE](LICENSE). The code in `src/` and `js/` is licensed under PolyForm Noncommercial 1.0.0, see [LICENSE-CODE](LICENSE-CODE). Free for personal use, academic and non-profit research, journalism, charities and government. Any use by a company or freelancer, including internal ESG/CSRD reporting, needs a commercial licence: https://somaai.earth/licensing (guillermollopis@somaai.earth). Versions up to v3.2.0 stay under CC BY 4.0 (data) and MIT (code). Attribution: Llopis-Garcia, G. (2026), SOMA AI Emission Factors (SAEF), https://doi.org/10.5281/zenodo.20443585.
+The data (v3.3.0 onward) is licensed under the SOMA AI Emission Factors Data Licence 1.0 (Non-Commercial), see [LICENSE](LICENSE). The code in `src/` and `js/` is licensed under PolyForm Noncommercial 1.0.0, see [LICENSE-CODE](LICENSE-CODE). Free for personal use, academic and non-profit research, journalism, charities and government. Any use by a company or freelancer, including internal ESG/CSRD reporting, needs a commercial licence: https://somaai.earth/licensing (guillermollopis@somaai.earth). Versions up to v3.2.0 stay under CC BY 4.0 (data) and MIT (code). Each later data release also becomes CC BY 4.0 six months after its Zenodo publication (v3.3.0 on 2027-05-24), see [OPEN-RELEASE.md](OPEN-RELEASE.md), so open-source projects can always ship a recent version. Attribution: Llopis-Garcia, G. (2026), SOMA AI Emission Factors (SAEF), https://doi.org/10.5281/zenodo.20443585.
